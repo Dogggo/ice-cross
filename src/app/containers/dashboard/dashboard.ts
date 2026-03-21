@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormArray, FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -36,7 +36,7 @@ export class Dashboard {
   private readonly eventsService = inject(EventsService);
   private readonly dialog = inject(MatDialog);
 
-  readonly events = signal<Event[]>([]);
+  readonly events = this.eventsService.events;
 
   readonly eventForm = this.fb.group({
     name: this.fb.nonNullable.control('', [Validators.required]),
@@ -45,7 +45,6 @@ export class Dashboard {
   });
 
   constructor() {
-    this.fetchEvents();
   }
 
   get categoriesFormArray(): FormArray<FormControl<string>> {
@@ -90,7 +89,6 @@ export class Dashboard {
       this.addCategoryField();
       this.eventForm.markAsPristine();
       this.eventForm.markAsUntouched();
-      this.fetchEvents();
     });
   }
 
@@ -100,14 +98,8 @@ export class Dashboard {
     });
     ref.afterClosed().subscribe((confirmed) => {
       if (confirmed) {
-        this.eventsService.deleteEvent(event.id).subscribe(() => this.fetchEvents());
+        this.eventsService.deleteEvent(event.id).subscribe();
       }
-    });
-  }
-
-  private fetchEvents(): void {
-    this.eventsService.getEvents().subscribe((res) => {
-      this.events.set(Array.isArray(res) ? res : (res.events ?? []));
     });
   }
 

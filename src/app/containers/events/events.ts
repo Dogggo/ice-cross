@@ -16,12 +16,15 @@ export class Events {
   private readonly route = inject(ActivatedRoute);
   private readonly eventsService = inject(EventsService);
 
-  readonly eventId = this.route.snapshot.paramMap.get('id') ?? '';
   readonly eventDetails = signal<GetEventDetailsResponse | null>(null);
 
   constructor() {
-    this.eventsService.getEventById(this.eventId).subscribe((event) => {
-      this.eventDetails.set(event);
+    this.route.paramMap.subscribe((params) => {
+      const eventId = params.get('id') ?? '';
+      this.eventDetails.set(null);
+      this.eventsService.getEventById(eventId).subscribe((event) => {
+        this.eventDetails.set(event);
+      });
     });
   }
 }

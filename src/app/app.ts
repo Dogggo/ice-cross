@@ -5,7 +5,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { EventsService } from './services/events.service';
 import { AuthService } from './services/auth.service';
-import type { Event } from './contracts/events';
 
 @Component({
   selector: 'app-root',
@@ -19,7 +18,7 @@ export class App {
   private readonly authService = inject(AuthService);
 
   readonly currentUrl = signal(this.router.url);
-  readonly sidebarEvents = signal<Event[]>([]);
+  readonly sidebarEvents = this.eventsService.events;
 
   readonly isLoginRoute = computed(() => this.currentUrl().startsWith('/login'));
 
@@ -27,25 +26,15 @@ export class App {
     this.router.events.subscribe((event: any) => {
       if (event instanceof NavigationEnd) {
         this.currentUrl.set(event.urlAfterRedirects);
-        if (event.urlAfterRedirects === '/') {
-          this.loadSidebarEvents();
-        }
       }
     });
-    if (!this.currentUrl().startsWith('/login')) {
-      this.loadSidebarEvents();
+    if (this.authService.isAuthenticated()) {
+      this.eventsService.refreshEvents();
     }
   }
 
   logout(): void {
     this.authService.logout();
     this.router.navigate(['/login']);
-  }
-
-  private loadSidebarEvents(): void {
-    if (!this.authService.isAuthenticated()) return;
-    this.eventsService.getEvents().subscribe((res) => {
-      this.sidebarEvents.set(Array.isArray(res) ? res : (res.events ?? []));
-    });
   }
 }
