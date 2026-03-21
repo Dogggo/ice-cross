@@ -1,0 +1,67 @@
+<div class="bracket">
+  @for (round of rounds(); track round.name; let ri = $index) {
+    <div class="round">
+      <h3 class="round-title">{{ round.name }}</h3>
+
+      <div class="heats">
+        @for (heat of round.heats; track heat.id; let hi = $index) {
+          <div class="heat-card" [class.locked]="heat.locked">
+            <div class="heat-header">
+              <span>Bieg {{ hi + 1 }}</span>
+              @if (heat.locked) {
+                <button mat-icon-button (click)="unlockHeat(ri, hi)" title="Odblokuj">
+                  <mat-icon>lock_open</mat-icon>
+                </button>
+              }
+            </div>
+
+            @for (slot of heat.slots; track $index; let si = $index) {
+              <div
+                class="slot"
+                [class.empty]="!slot.participantName"
+                [class.advancer]="isAdvancer(ri, hi, si)"
+              >
+                <span class="slot-name">{{ slot.participantName ?? '—' }}</span>
+                @if (slot.participantName && !heat.locked) {
+                  <input
+                    class="score-input"
+                    type="number"
+                    min="1"
+                    max="4"
+                    placeholder="1-4"
+                    [value]="slot.score"
+                    (input)="onScoreChange(ri, hi, si, $any($event.target).value)"
+                  />
+                }
+                @if (slot.participantName && heat.locked) {
+                  <span class="score-badge" [class.top]="isAdvancer(ri, hi, si)">
+                    {{ slot.score }}
+                  </span>
+                }
+              </div>
+            }
+
+            @if (!heat.locked) {
+              <button
+                mat-flat-button
+                class="confirm-btn"
+                (click)="lockHeat(ri, hi)"
+                [disabled]="!heat.slots.some(s => s.participantName)"
+              >
+                Zatwierdź
+              </button>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    @if (ri < totalRounds() - 1) {
+      <div class="connector"></div>
+    }
+  }
+</div>
+
+@if (errorMessage(); as errMsg) {
+  <p class="error-message">{{ errMsg }}</p>
+}

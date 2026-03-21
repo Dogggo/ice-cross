@@ -1,0 +1,33 @@
+<div class="event-container">
+	@if (eventDetails(); as event) {
+		<h1 style="margin-bottom: 24px;">Ice cross kids - {{ event.name }} {{ event.date | date:'yyyy-MM-dd' }}</h1>
+		<div class="section">
+			<h1>Lista startowa</h1>
+			<a id="starting-list" mat-flat-button [routerLink]="['starting-list']">
+				Zobacz liste
+			</a>
+		</div>
+
+		<div class="section">
+			<h1>Eliminacje czasowe</h1>
+			<div class="button-list">
+				@for (category of event.categories; track category.id) {
+					<a mat-stroked-button [routerLink]="['timed-eliminations', category.id]">{{ category.name }}</a>
+				}
+			</div>
+		</div>
+
+		<div class="section">
+			<h1>Turniej</h1>
+			<div class="button-list">
+				@for (category of event.categories; track category.id) {
+					@if (category.tournament) {
+						<a mat-stroked-button [routerLink]="['tournament', category.tournament.id]">{{ category.name }}</a>
+					}
+				}
+			</div>
+		</div>
+	} @else {
+		<p>Trwa ladowanie wydarzenia...</p>
+	}
+</div>

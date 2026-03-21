@@ -1,0 +1,15 @@
+
+.app-wrapper {
+	position: relative;
+	padding-top: 50px;
+}
+
+.global-back-button {
+	position: absolute;
+	left: 16px;
+	top: 16px;
+	z-index: 100;
+	background: transparent;
+	border: none;
+	cursor: pointer;
+}

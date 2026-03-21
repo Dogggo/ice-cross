@@ -1,0 +1,33 @@
+.timed-eliminations-container {
+	padding: 24px;
+
+	h1 {
+		margin-bottom: 4px;
+	}
+
+	.event-subtitle {
+		color: rgba(0, 0, 0, 0.54);
+		font-size: 14px;
+		margin-bottom: 24px;
+	}
+}
+
+.eliminations-table {
+	width: 100%;
+	margin-bottom: 24px;
+
+	.time-field {
+		width: 148px;
+		margin: 6px 0;
+	}
+
+	td.best-time .mat-mdc-text-field-wrapper {
+		background-color: rgba(76, 175, 80, 0.35) !important;
+	}
+}
+
+.actions {
+	display: flex;
+	gap: 12px;
+	padding-top: 8px;
+}

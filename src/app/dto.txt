@@ -1,0 +1,181 @@
+// detele event by id
+
+// create event
+
+// request body 
+interface CreateEventRequestBody {
+    name: string;
+    date: string;
+    categories: string[]
+}
+
+// response
+interface CreateEventResponse {
+    id: string;
+    name: string;
+    date: string;
+}
+
+// event details
+
+// path params
+interface GetEventDetailsPathParams {
+    eventId: string;
+}
+
+// response
+interface GetEventDetailsResponse {
+    timedEliminations: {
+        id: string;
+        name: string;
+        isConfirmed: boolean
+    }[];
+    tournaments: {
+        id: string
+        name: string;
+    }[];
+ }
+
+ // create starting list
+
+ // request body
+type PostStartingListRequestBody =  {
+    categoryId: string;
+    participants: {
+        bibNumber: number;
+        name: string;
+        sportClub: string;
+        dob: string; // iso date
+        consent: boolean;
+        present: boolean
+    }[];
+}[]
+
+// get starting list
+
+// path params
+interface GetStartingListPathParams {
+    eventId: string;
+}
+
+type GetStartingListResponse = 
+ {
+    categoryId: string;
+    participants: {
+        id: string
+        bibNumber: number;
+        name: string;
+        sportClub: string;
+        dob: string; // iso date
+        consent: boolean;
+        present: boolean
+    }[];
+}[] ;
+
+// get timed elimination
+
+enum TimedEliminationState {
+    Round1 = 'Round1',
+    Round2 = 'Round2',
+    Finished = 'Finished'
+}
+
+// BE sorting by bibNumber, FE sorting by placement
+interface GetTimedElimination {
+    state: TimedEliminationState;
+    isSecondRoundSkipped: boolean; // by default zwracasz false, chyba ze bedzie request
+    participants: {
+        id: string;
+        bibNumber: number;
+        name: string;
+        firstRoundTime: number | null; // in miliseconds
+        secondRoundTime: number | null; // in miliseconds
+        placement: number | null
+    }[];
+}
+
+
+// post timed elimination
+
+// path params
+interface PostTimedEliminationPathParams {
+    eventId: string;
+    categoryId: string;
+}
+
+// request body 
+interface PostTimedEliminationRequestBody {
+    state: TimedEliminationState
+    participants: {
+        id: string;
+        roundTime: number | null; // in miliseconds
+    }
+}
+
+// edit timed elimination
+interface PutTimedEliminationPathParams {
+    eventId: string;
+    categoryId: string;
+}
+
+// request body 
+interface PutTimedEliminationRequestBody {
+    participants: {
+        id: string;
+        firstRoundTime: number | null; // in miliseconds
+        secondRoundTime: number | null; // in miliseconds
+    }
+}
+
+// + endpoint do zatwierdzania 
+interface ConfirmTimedEliminationPathParams {
+    eventId: string;
+    categoryId: string;
+}
+
+// + endpoint do pomijania 2 rundy 
+interface SkipSecondRoundTimedEliminationPathParams {
+    eventId: string;
+    categoryId: string;
+}
+
+// create tournament
+
+//path params
+interface CreateTournamentPathParams {
+    eventId: string;
+    categoryId: string;
+}
+
+// request body
+interface CreateTournamentRequestBody {
+    size: number;
+    lcq: {
+        size: number;
+        from: number;
+        to: number;
+    } | null
+}
+
+// get tournament details
+
+//path params
+interface GetTournamentDetailsPathParams {
+    eventId: string;
+    categoryId: string;
+}
+
+enum TournamentState {
+    Settings = 'Settings',
+    Started = 'Started',
+    Finished = 'Finished'
+}
+
+interface GetTournamentDetailsResponse {
+    state: TournamentState;
+    currentRound: {
+        name: string;
+        id: number;
+
+    }
+}

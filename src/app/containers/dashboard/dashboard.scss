@@ -1,0 +1,29 @@
+:host {
+    width: 100%;
+    height: 100%;
+
+    .dashboard-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .form {
+        display: flex;
+        flex-direction: column;
+    }
+
+    form {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .events {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+}

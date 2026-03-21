@@ -1,0 +1,8 @@
+<div class="app-wrapper">
+	@if (!isRootRoute) {
+		<button class="global-back-button" type="button" (click)="goBack()">
+			<span style="font-size: 24px;">&lt;</span>
+		</button>
+	}
+	<router-outlet></router-outlet>
+</div>

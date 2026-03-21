@@ -1,0 +1,142 @@
+.bracket {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 16px;
+}
+
+.round {
+  display: flex;
+  flex-direction: column;
+  min-width: 220px;
+}
+
+.round-title {
+  text-align: center;
+  margin: 0 0 12px;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--mat-sys-on-surface-variant, #555);
+}
+
+.heats {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.heat-card {
+  border: 1px solid var(--mat-sys-outline-variant, #ddd);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--mat-sys-surface, #fff);
+
+  &.locked {
+    border-color: var(--mat-sys-primary, #1976d2);
+  }
+}
+
+.heat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  background: var(--mat-sys-surface-container, #f3f3f3);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-height: 36px;
+}
+
+.slot {
+  display: flex;
+  align-items: center;
+  padding: 6px 12px;
+  gap: 8px;
+  border-top: 1px solid var(--mat-sys-outline-variant, #eee);
+  min-height: 40px;
+
+  &.empty {
+    opacity: 0.4;
+  }
+
+  &.advancer {
+    background: color-mix(in srgb, var(--mat-sys-primary, #1976d2) 8%, transparent);
+  }
+}
+
+.slot-name {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.score-input {
+  width: 48px;
+  padding: 4px 6px;
+  border: 1px solid var(--mat-sys-outline-variant, #ccc);
+  border-radius: 4px;
+  text-align: center;
+  font-size: 14px;
+  background: var(--mat-sys-surface, #fff);
+  color: var(--mat-sys-on-surface, #000);
+
+  &:focus {
+    outline: 2px solid var(--mat-sys-primary, #1976d2);
+    outline-offset: -1px;
+  }
+
+  /* Hide spinner arrows */
+  -moz-appearance: textfield;
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
+.score-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--mat-sys-surface-container, #e8e8e8);
+
+  &.top {
+    background: var(--mat-sys-primary, #1976d2);
+    color: var(--mat-sys-on-primary, #fff);
+  }
+}
+
+.confirm-btn {
+  width: 100%;
+  border-radius: 0 0 8px 8px;
+}
+
+.connector {
+  display: flex;
+  align-items: center;
+  padding-top: 48px;
+  color: var(--mat-sys-outline-variant, #ccc);
+
+  &::after {
+    content: '→';
+    font-size: 24px;
+  }
+}
+
+.error-message {
+  color: var(--mat-sys-error, #b00020);
+  font-size: 13px;
+  margin: 8px 16px;
+}

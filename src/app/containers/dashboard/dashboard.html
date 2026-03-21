@@ -1,0 +1,49 @@
+<div class="dashboard-container">
+
+	<form [formGroup]="eventForm" (ngSubmit)="createEvent()">
+    <h1 id="create-event-header">Stworz wydarzenie</h1>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div class="form">
+                <mat-form-field appearance="outline">
+                    <mat-label>Nazwa zawodów</mat-label>
+                    <input matInput formControlName="name" />
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Data zawodów</mat-label>
+                    <input matInput [matDatepicker]="picker" formControlName="date" />
+                    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                    <mat-datepicker #picker></mat-datepicker>
+                </mat-form-field>
+            </div>
+
+            <h2 id="id-category-header">Dodaj kategorie</h2>
+
+            <div formArrayName="categories">
+                @for (categoryControl of categoriesFormArray.controls; track $index) {
+                    <div class="form">
+                        <mat-form-field appearance="outline">
+                            <mat-label>Kategoria {{ $index + 1 }}</mat-label>
+                            <input matInput [formControlName]="$index" />
+                        </mat-form-field>
+                    </div>
+                }
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+            <button style="width: 20px" id="add-category" mat-stroked-button type="button" (click)="addCategoryField()">+</button>
+            <button style="width: 20px" id="remove-category" mat-stroked-button type="button" (click)="removeCategoryField()">-</button>
+            </div>
+        </div>
+        <button style="margin-top: 16px;" id="create-event" mat-flat-button type="submit">Dodaj wydarzenie</button>
+	</form>
+
+    <h1 id="created-events-header">Stworzone wydarzenia</h1>
+
+	<mat-list class="events">
+        @for (event of events(); track event.id) {
+            <button mat-stroked-button type="button" [routerLink]="['/event', event.id]">
+                {{ event.name }} {{ event.date | date: 'dd.MM.yyyy' : 'UTC' }}
+            </button>
+		}
+	</mat-list>
+</div>

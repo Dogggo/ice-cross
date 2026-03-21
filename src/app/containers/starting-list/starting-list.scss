@@ -1,0 +1,50 @@
+.starting-list-container {
+	padding: 64px;
+
+	h1 {
+		margin-bottom: 24px;
+	}
+}
+
+.entry-form {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 12px;
+	align-items: flex-start;
+	margin-bottom: 8px;
+
+	mat-form-field {
+		flex: 1 1 160px;
+		min-width: 120px;
+	}
+}
+
+.form-actions {
+	display: flex;
+	gap: 12px;
+	align-items: center;
+	margin-bottom: 16px;
+}
+
+.hidden-input {
+	display: none;
+}
+
+.participants-table {
+	width: 100%;
+	margin-top: 8px;
+
+	td,
+	th {
+		padding: 8px 16px;
+	}
+}
+
+.bib-input {
+	width: 60px;
+	padding: 4px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	text-align: center;
+}

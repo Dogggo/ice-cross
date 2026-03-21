@@ -1,0 +1,102 @@
+<div class="timed-eliminations-container">
+	<h1>Eliminacje czasowe</h1>
+
+	@if (state() === null) {
+		<p>Trwa ładowanie...</p>
+	} @else {
+		<table mat-table [dataSource]="participants()" class="eliminations-table">
+
+			<!-- Placement column (Filled only) -->
+			<ng-container matColumnDef="placement">
+				<th mat-header-cell *matHeaderCellDef>Wynik</th>
+				<td mat-cell *matCellDef="let row">{{ row.placement }}</td>
+			</ng-container>
+
+			<!-- Bib number column -->
+			<ng-container matColumnDef="bibNumber">
+				<th mat-header-cell *matHeaderCellDef>Nr</th>
+				<td mat-cell *matCellDef="let row">{{ row.bibNumber }}</td>
+			</ng-container>
+
+			<!-- Name column -->
+			<ng-container matColumnDef="name">
+				<th mat-header-cell *matHeaderCellDef>Imię i nazwisko</th>
+				<td mat-cell *matCellDef="let row">{{ row.name }}</td>
+			</ng-container>
+
+			<!-- Round 1 column -->
+			<ng-container matColumnDef="round1">
+				<th mat-header-cell *matHeaderCellDef>Czas: Runda 1</th>
+				<td mat-cell *matCellDef="let row">
+					<mat-form-field appearance="outline" class="time-field">
+						<input matInput [formControl]="getControl(row.id, 'round1')" placeholder="00:00:000" />
+						<mat-hint>mm:ss:ms</mat-hint>
+					</mat-form-field>
+				</td>
+			</ng-container>
+
+			<!-- Round 2 column -->
+			<ng-container matColumnDef="round2">
+				<th mat-header-cell *matHeaderCellDef>Czas: Runda 2</th>
+				<td mat-cell *matCellDef="let row">
+					<mat-form-field appearance="outline" class="time-field">
+						<input matInput [formControl]="getControl(row.id, 'round2')" placeholder="00:00:000" />
+						<mat-hint>mm:ss:ms</mat-hint>
+					</mat-form-field>
+				</td>
+			</ng-container>
+
+			<tr mat-header-row *matHeaderRowDef="displayedColumns()"></tr>
+			<tr mat-row *matRowDef="let row; columns: displayedColumns()"></tr>
+		</table>
+
+		<div class="actions">
+			@switch (state()) {
+
+				@case ('Round1') {
+					<button
+						mat-flat-button
+						type="button"
+						[disabled]="!allRound1Filled()"
+						(click)="confirmRound1()"
+					>
+						Zatwierdz 1 rundę
+					</button>
+				}
+
+				@case ('Round2') {
+					<button
+						mat-flat-button
+						type="button"
+						[disabled]="!allRound2Filled()"
+						(click)="confirmRound2()"
+					>
+						Zatwierdz 2 rundę
+					</button>
+					<button mat-stroked-button type="button" (click)="skipSecondRound()">
+						Pomiń 2 rundę
+					</button>
+				}
+
+				@case ('Filled') {
+					@if (!isEditMode()) {
+						<button mat-flat-button type="button" (click)="confirmResults()">
+							Zatwierdz wyniki
+						</button>
+						<button mat-stroked-button type="button" (click)="enterEditMode()">
+							Edytuj
+						</button>
+					} @else {
+						<button mat-flat-button type="button" (click)="confirmEdit()">
+							Zatwierdz edycje
+						</button>
+						<button mat-stroked-button type="button" (click)="resetElimination()">
+							Zresetuj
+						</button>
+					}
+				}
+
+			}
+		</div>
+	}
+</div>
