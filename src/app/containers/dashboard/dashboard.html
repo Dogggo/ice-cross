@@ -41,9 +41,14 @@
 
 	<mat-list class="events">
         @for (event of events(); track event.id) {
-            <button mat-stroked-button type="button" [routerLink]="['/event', event.id]">
-                {{ event.name }} {{ event.date | date: 'dd.MM.yyyy' : 'UTC' }}
-            </button>
+            <div class="event-row">
+                <button mat-stroked-button type="button" [routerLink]="['/event', event.id]">
+                    {{ event.name }} {{ event.date | date: 'dd.MM.yyyy' : 'UTC' }}
+                </button>
+                <button mat-icon-button type="button" (click)="deleteEvent(event)" aria-label="Usuń wydarzenie">
+                    <mat-icon>close</mat-icon>
+                </button>
+            </div>
 		}
 	</mat-list>
 </div>

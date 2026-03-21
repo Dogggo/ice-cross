@@ -4,11 +4,14 @@ import { FormArray, FormBuilder, FormControl, ReactiveFormsModule, Validators } 
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatNativeDateModule } from '@angular/material/core';
 import { EventsService } from '../../services/events.service';
+import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
 import type { Event } from '../../contracts/events';
 
 @Component({
@@ -21,6 +24,7 @@ import type { Event } from '../../contracts/events';
     MatInputModule,
     MatDatepickerModule,
     MatButtonModule,
+    MatIconModule,
     MatListModule,
     MatNativeDateModule,
   ],
@@ -30,6 +34,7 @@ import type { Event } from '../../contracts/events';
 export class Dashboard {
   private readonly fb = inject(FormBuilder);
   private readonly eventsService = inject(EventsService);
+  private readonly dialog = inject(MatDialog);
 
   readonly events = signal<Event[]>([]);
 
@@ -86,6 +91,17 @@ export class Dashboard {
       this.eventForm.markAsPristine();
       this.eventForm.markAsUntouched();
       this.fetchEvents();
+    });
+  }
+
+  deleteEvent(event: Event): void {
+    const ref = this.dialog.open(ConfirmDialog, {
+      data: { message: `Czy na pewno chcesz usunąć wydarzenie "${event.name}"?` },
+    });
+    ref.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.eventsService.deleteEvent(event.id).subscribe(() => this.fetchEvents());
+      }
     });
   }
 
