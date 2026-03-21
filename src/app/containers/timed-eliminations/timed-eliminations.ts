@@ -5,6 +5,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { TimedEliminationService } from '../../services/timed-elimination.service';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
@@ -30,6 +31,7 @@ export interface ParticipantRow {
   name: string;
   bibNumber: number;
   placement: number;
+  resigned: boolean;
 }
 
 @Component({
@@ -40,6 +42,7 @@ export interface ParticipantRow {
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
+    MatCheckboxModule,
     MatDialogModule,
   ],
   templateUrl: './timed-eliminations.html',
@@ -67,6 +70,7 @@ export class TimedEliminations {
     if (s === TimedEliminationState.Filled) cols.push('placement');
     cols.push('bibNumber', 'name', 'round1');
     if (!this.isSecondRoundSkipped()) cols.push('round2');
+    if (this.isEditMode()) cols.push('resigned');
     return cols;
   });
 
@@ -105,6 +109,7 @@ export class TimedEliminations {
       name: p.name,
       bibNumber: p.bibNumber,
       placement: p.placement,
+      resigned: false,
     })));
 
     sorted.forEach((p) => {
@@ -115,19 +120,26 @@ export class TimedEliminations {
         this.rowFormMap.set(p.id, this.fb.group({
           round1: [{ value: msToTimeString(p.firstRoundTime), disabled: r1Disabled }],
           round2: [{ value: msToTimeString(p.secondRoundTime), disabled: r2Disabled }],
+          resigned: [{ value: false, disabled: true }],
         }));
       } else {
         const group = this.rowFormMap.get(p.id)!;
         group.get('round1')!.setValue(msToTimeString(p.firstRoundTime), { emitEvent: false });
         group.get('round2')!.setValue(msToTimeString(p.secondRoundTime), { emitEvent: false });
+        group.get('resigned')!.setValue(false, { emitEvent: false });
         r1Disabled ? group.get('round1')!.disable() : group.get('round1')!.enable();
         r2Disabled ? group.get('round2')!.disable() : group.get('round2')!.enable();
+        group.get('resigned')!.disable();
       }
     });
   }
 
   getControl(id: string, field: 'round1' | 'round2'): FormControl {
     return (this.rowFormMap.get(id)?.get(field) ?? new FormControl()) as FormControl;
+  }
+
+  getResignedControl(id: string): FormControl<boolean> {
+    return (this.rowFormMap.get(id)?.get('resigned') ?? new FormControl(false)) as FormControl<boolean>;
   }
 
   confirmRound1(): void {
@@ -181,6 +193,7 @@ export class TimedEliminations {
     this.rowFormMap.forEach((group) => {
       group.get('round1')!.enable();
       if (!this.isSecondRoundSkipped()) group.get('round2')!.enable();
+      group.get('resigned')!.enable();
     });
   }
 
@@ -189,6 +202,7 @@ export class TimedEliminations {
       id: p.id,
       firstRoundTime: parseTime(this.rowFormMap.get(p.id)?.get('round1')?.value ?? '') ?? 0,
       secondRoundTime: parseTime(this.rowFormMap.get(p.id)?.get('round2')?.value ?? '') ?? 0,
+      resigned: this.rowFormMap.get(p.id)?.get('resigned')?.value ?? false,
     }));
     this.service.put(this.eventId, this.categoryId, { participants }).subscribe(() => this.fetchData());
   }
