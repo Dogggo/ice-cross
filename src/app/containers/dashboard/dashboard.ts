@@ -8,8 +8,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatListModule } from '@angular/material/list';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { EventsService } from '../../services/events.service';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
 import type { Event } from '../../contracts/events';
@@ -25,7 +25,7 @@ import type { Event } from '../../contracts/events';
     MatDatepickerModule,
     MatButtonModule,
     MatIconModule,
-    MatListModule,
+    MatTooltipModule,
     MatNativeDateModule,
   ],
   templateUrl: './dashboard.html',

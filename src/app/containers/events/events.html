@@ -1,33 +1,60 @@
-<div class="event-container">
-	@if (eventDetails(); as event) {
-		<h1 style="margin-bottom: 24px;">Ice cross kids - {{ event.name }} {{ event.date | date:'yyyy-MM-dd' }}</h1>
-		<div class="section">
-			<h1>Lista startowa</h1>
-			<a id="starting-list" mat-flat-button [routerLink]="['starting-list']">
-				Zobacz liste
-			</a>
-		</div>
+<div class="page-wrapper">
+  @if (eventDetails(); as event) {
 
-		<div class="section">
-			<h1>Eliminacje czasowe</h1>
-			<div class="button-list">
-				@for (category of event.categories; track category.id) {
-					<a mat-stroked-button [routerLink]="['timed-eliminations', category.id]">{{ category.name }}</a>
-				}
-			</div>
-		</div>
+    <div class="event-header">
+      <h1 class="event-title">{{ event.name }}</h1>
+      <span class="event-date-badge">{{ event.date | date:'dd.MM.yyyy' }}</span>
+    </div>
 
-		<div class="section">
-			<h1>Turniej</h1>
-			<div class="button-list">
-				@for (category of event.categories; track category.id) {
-					@if (category.tournament) {
-						<a mat-stroked-button [routerLink]="['tournament', category.tournament.id]">{{ category.name }}</a>
-					}
-				}
-			</div>
-		</div>
-	} @else {
-		<p>Trwa ladowanie wydarzenia...</p>
-	}
+    <div class="sections-grid">
+
+      <div class="section-card">
+        <div class="section-card-header">
+          <mat-icon class="section-icon">format_list_numbered</mat-icon>
+          <h2 class="section-card-title">Lista startowa</h2>
+        </div>
+        <p class="section-desc">Zarządzaj uczestnikami i listą startową</p>
+        <a id="starting-list" mat-flat-button [routerLink]="['starting-list']">
+          Otwórz listę startową
+        </a>
+      </div>
+
+      <div class="section-card">
+        <div class="section-card-header">
+          <mat-icon class="section-icon">timer</mat-icon>
+          <h2 class="section-card-title">Eliminacje czasowe</h2>
+        </div>
+        <p class="section-desc">Wprowadź czasy i zatwierdź rundy eliminacyjne</p>
+        <div class="category-btn-list">
+          @for (category of event.categories; track category.id) {
+            <a mat-stroked-button [routerLink]="['timed-eliminations', category.id]">
+              {{ category.name }}
+            </a>
+          }
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-card-header">
+          <mat-icon class="section-icon">emoji_events</mat-icon>
+          <h2 class="section-card-title">Turniej</h2>
+        </div>
+        <p class="section-desc">Drabinka turniejowa dla każdej kategorii</p>
+        <div class="category-btn-list">
+          @for (category of event.categories; track category.id) {
+            @if (category.tournament) {
+              <a mat-stroked-button [routerLink]="['tournament', category.tournament.id]">
+                {{ category.name }}
+              </a>
+            }
+          }
+        </div>
+      </div>
+
+    </div>
+  } @else {
+    <div class="loading-state">
+      <p>Trwa ładowanie wydarzenia...</p>
+    </div>
+  }
 </div>

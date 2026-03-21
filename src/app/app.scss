@@ -1,15 +1,132 @@
-
-.app-wrapper {
-	position: relative;
-	padding-top: 50px;
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
 }
 
-.global-back-button {
-	position: absolute;
-	left: 16px;
-	top: 16px;
-	z-index: 100;
-	background: transparent;
-	border: none;
-	cursor: pointer;
+// ── HEADER ──────────────────────────────────────────────────────────────
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--header-height);
+  padding: 0 20px;
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--header-border);
+  flex-shrink: 0;
+  z-index: 10;
+
+  .header-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .brand-icon {
+      color: #3d5afe;
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+    }
+
+    .brand-name {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+    }
+  }
+
+  .logout-btn {
+    color: var(--text-secondary);
+  }
+}
+
+// ── SHELL BODY ───────────────────────────────────────────────────────────
+.shell-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+// ── SIDEBAR ──────────────────────────────────────────────────────────────
+.sidebar {
+  width: var(--sidebar-width);
+  background: var(--sidebar-bg);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.sidebar-nav {
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav-section-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--sidebar-label);
+  padding: 16px 12px 6px;
+  margin: 0;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  color: var(--sidebar-text);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 400;
+  transition: background 0.15s ease, color 0.15s ease;
+  cursor: pointer;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    opacity: 0.75;
+  }
+
+  .nav-item-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &:hover {
+    background: var(--sidebar-hover);
+    color: #ffffff;
+
+    mat-icon {
+      opacity: 1;
+    }
+  }
+
+  &.nav-item--active {
+    background: var(--sidebar-active-bg);
+    color: var(--sidebar-active-color);
+    font-weight: 500;
+
+    mat-icon {
+      opacity: 1;
+    }
+  }
+}
+
+// ── PAGE CONTENT ─────────────────────────────────────────────────────────
+.page-content {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--content-bg);
 }

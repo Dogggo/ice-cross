@@ -1,21 +1,28 @@
-<div class="login-container">
-  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-    <h1>Logowanie</h1>
+<div class="login-page">
+  <div class="login-card">
+    <div class="login-brand">
+      <span class="login-brand-icon">&#10052;</span>
+      <h1 class="login-brand-name">Ice Cross</h1>
+    </div>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Nazwa użytkownika</mat-label>
-      <input matInput formControlName="username" autocomplete="username" />
-    </mat-form-field>
+    <p class="login-subtitle">Panel administracyjny</p>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Hasło</mat-label>
-      <input matInput type="password" formControlName="password" autocomplete="current-password" />
-    </mat-form-field>
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Nazwa użytkownika</mat-label>
+        <input matInput formControlName="username" autocomplete="username" />
+      </mat-form-field>
 
-    @if (errorMessage) {
-      <p class="error-message">{{ errorMessage }}</p>
-    }
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Hasło</mat-label>
+        <input matInput type="password" formControlName="password" autocomplete="current-password" />
+      </mat-form-field>
 
-    <button mat-flat-button type="submit">Zaloguj się</button>
-  </form>
+      @if (errorMessage) {
+        <p class="error-message">{{ errorMessage }}</p>
+      }
+
+      <button mat-flat-button type="submit" class="login-btn">Zaloguj się</button>
+    </form>
+  </div>
 </div>

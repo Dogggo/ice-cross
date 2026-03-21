@@ -1,8 +1,40 @@
-<div class="app-wrapper">
-	@if (!isRootRoute) {
-		<button class="global-back-button" type="button" (click)="goBack()">
-			<span style="font-size: 24px;">&lt;</span>
-		</button>
-	}
-	<router-outlet></router-outlet>
-</div>
+@if (isLoginRoute()) {
+  <router-outlet />
+} @else {
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="header-brand">
+        <mat-icon class="brand-icon">ac_unit</mat-icon>
+        <span class="brand-name">Ice Cross</span>
+      </div>
+      <button mat-icon-button class="logout-btn" (click)="logout()" matTooltip="Wyloguj">
+        <mat-icon>logout</mat-icon>
+      </button>
+    </header>
+
+    <div class="shell-body">
+      <aside class="sidebar">
+        <nav class="sidebar-nav">
+          <a class="nav-item" routerLink="/" routerLinkActive="nav-item--active" [routerLinkActiveOptions]="{exact: true}">
+            <mat-icon>home</mat-icon>
+            <span>Dashboard</span>
+          </a>
+
+          @if (sidebarEvents().length > 0) {
+            <p class="nav-section-label">Wydarzenia</p>
+            @for (event of sidebarEvents(); track event.id) {
+              <a class="nav-item" [routerLink]="['/event', event.id]" routerLinkActive="nav-item--active">
+                <mat-icon>emoji_events</mat-icon>
+                <span class="nav-item-text">{{ event.name }}</span>
+              </a>
+            }
+          }
+        </nav>
+      </aside>
+
+      <main class="page-content">
+        <router-outlet />
+      </main>
+    </div>
+  </div>
+}

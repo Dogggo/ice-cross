@@ -2,12 +2,13 @@ import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { EventsService } from '../../services/events.service';
 import type { GetEventDetailsResponse } from '../../contracts/events';
 
 @Component({
   selector: 'app-events',
-  imports: [MatButtonModule, RouterLink, DatePipe],
+  imports: [MatButtonModule, MatIconModule, RouterLink, DatePipe],
   templateUrl: './events.html',
   styleUrl: './events.scss',
 })

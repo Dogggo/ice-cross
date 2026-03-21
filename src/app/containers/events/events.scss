@@ -1,37 +1,84 @@
 :host {
-    width: 100%;
-    height: 100%;
+  display: block;
+  width: 100%;
+}
 
-    .event-container {
-           display: flex;
-           flex-direction: column;
-           align-items: center;
-           justify-content: center;
-           gap: 16px;
+.event-header {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+
+  .event-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+
+  .event-date-badge {
+    background: #e8edf5;
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+}
+
+.sections-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.section-card {
+  background: var(--card-bg);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .section-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .section-icon {
+      color: #3d5afe;
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
     }
 
-    h1 {
-        margin: 8px 0 0;
+    .section-card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0;
     }
+  }
 
-    .button-list {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        width: 100%;
-        max-width: 320px;
-    }
+  .section-desc {
+    font-size: 0.825rem;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.5;
+  }
+}
 
-    .button-list button {
-        width: 300px;
-    }
+.category-btn-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 
-    .section {
-        padding-bottom: 24px; 
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        justify-content: center;
-        align-items: center
-    }
+.loading-state {
+  padding: 48px 0;
+  text-align: center;
+  color: var(--text-secondary);
 }

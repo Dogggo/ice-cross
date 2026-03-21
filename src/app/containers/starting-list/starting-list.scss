@@ -1,50 +1,72 @@
-.starting-list-container {
-	padding: 64px;
+:host {
+  display: block;
+  width: 100%;
+}
 
-	h1 {
-		margin-bottom: 24px;
-	}
+.starting-list-container {
+  padding: 32px;
+  max-width: 1100px;
+  margin: 0 auto;
+
+  h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 24px;
+    letter-spacing: -0.02em;
+  }
 }
 
 .entry-form {
-	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
-	gap: 12px;
-	align-items: flex-start;
-	margin-bottom: 8px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 8px;
 
-	mat-form-field {
-		flex: 1 1 160px;
-		min-width: 120px;
-	}
+  mat-form-field {
+    flex: 1 1 160px;
+    min-width: 120px;
+  }
 }
 
 .form-actions {
-	display: flex;
-	gap: 12px;
-	align-items: center;
-	margin-bottom: 16px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+
+  flex-wrap: wrap;
 }
 
 .hidden-input {
-	display: none;
+  display: none;
 }
 
 .participants-table {
-	width: 100%;
-	margin-top: 8px;
+  width: 100%;
+  margin-top: 8px;
+  border-radius: 8px;
+  overflow: hidden;
 
-	td,
-	th {
-		padding: 8px 16px;
-	}
+  td,
+  th {
+    padding: 10px 16px;
+  }
 }
 
 .bib-input {
-	width: 60px;
-	padding: 4px;
-	border: 1px solid #ccc;
-	border-radius: 4px;
-	text-align: center;
+  width: 60px;
+  padding: 4px 6px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  text-align: center;
+  font-size: 0.875rem;
+  background: #fff;
+
+  &:focus {
+    outline: none;
+    border-color: #3d5afe;
+  }
 }

@@ -1,54 +1,78 @@
-<div class="dashboard-container">
+<div class="page-wrapper">
 
-	<form [formGroup]="eventForm" (ngSubmit)="createEvent()">
-    <h1 id="create-event-header">Stworz wydarzenie</h1>
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-            <div class="form">
-                <mat-form-field appearance="outline">
-                    <mat-label>Nazwa zawodów</mat-label>
-                    <input matInput formControlName="name" />
-                </mat-form-field>
+  <!-- Create event form -->
+  <section class="section-card">
+    <h2 class="section-title">Stwórz wydarzenie</h2>
 
-                <mat-form-field appearance="outline">
-                    <mat-label>Data zawodów</mat-label>
-                    <input matInput [matDatepicker]="picker" formControlName="date" />
-                    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-                    <mat-datepicker #picker></mat-datepicker>
-                </mat-form-field>
-            </div>
+    <form [formGroup]="eventForm" (ngSubmit)="createEvent()">
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="field-grow">
+          <mat-label>Nazwa zawodów</mat-label>
+          <input matInput formControlName="name" />
+        </mat-form-field>
 
-            <h2 id="id-category-header">Dodaj kategorie</h2>
+        <mat-form-field appearance="outline" class="field-date">
+          <mat-label>Data zawodów</mat-label>
+          <input matInput [matDatepicker]="picker" formControlName="date" />
+          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+      </div>
 
-            <div formArrayName="categories">
-                @for (categoryControl of categoriesFormArray.controls; track $index) {
-                    <div class="form">
-                        <mat-form-field appearance="outline">
-                            <mat-label>Kategoria {{ $index + 1 }}</mat-label>
-                            <input matInput [formControlName]="$index" />
-                        </mat-form-field>
-                    </div>
-                }
-            </div>
-            <div style="display: flex; justify-content: space-between;">
-            <button style="width: 20px" id="add-category" mat-stroked-button type="button" (click)="addCategoryField()">+</button>
-            <button style="width: 20px" id="remove-category" mat-stroked-button type="button" (click)="removeCategoryField()">-</button>
-            </div>
+      <div class="categories-section">
+        <h3 class="categories-label">Kategorie</h3>
+
+        <div formArrayName="categories" class="categories-list">
+          @for (categoryControl of categoriesFormArray.controls; track $index) {
+            <mat-form-field appearance="outline" class="category-field">
+              <mat-label>Kategoria {{ $index + 1 }}</mat-label>
+              <input matInput [formControlName]="$index" />
+            </mat-form-field>
+          }
         </div>
-        <button style="margin-top: 16px;" id="create-event" mat-flat-button type="submit">Dodaj wydarzenie</button>
-	</form>
 
-    <h1 id="created-events-header">Stworzone wydarzenia</h1>
+        <div class="category-actions">
+          <button mat-stroked-button type="button" (click)="addCategoryField()">
+            <mat-icon>add</mat-icon> Dodaj kategorię
+          </button>
+          @if (categoriesFormArray.length > 1) {
+            <button mat-icon-button type="button" (click)="removeCategoryField()" matTooltip="Usuń ostatnią">
+              <mat-icon>remove</mat-icon>
+            </button>
+          }
+        </div>
+      </div>
 
-	<mat-list class="events">
+      <div class="form-footer">
+        <button mat-flat-button type="submit">Dodaj wydarzenie</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Events list -->
+  <section class="events-section">
+    <h2 class="section-title">Stworzone wydarzenia</h2>
+
+    @if (events().length === 0) {
+      <p class="empty-state">Brak wydarzeń. Stwórz pierwsze wydarzenie powyżej.</p>
+    } @else {
+      <div class="events-grid">
         @for (event of events(); track event.id) {
-            <div class="event-row">
-                <button mat-stroked-button type="button" [routerLink]="['/event', event.id]">
-                    {{ event.name }} {{ event.date | date: 'dd.MM.yyyy' : 'UTC' }}
-                </button>
-                <button mat-icon-button type="button" (click)="deleteEvent(event)" aria-label="Usuń wydarzenie">
-                    <mat-icon>close</mat-icon>
-                </button>
+          <div class="event-card">
+            <div class="event-card-body">
+              <span class="event-name">{{ event.name }}</span>
+              <span class="event-date">{{ event.date | date: 'dd.MM.yyyy' : 'UTC' }}</span>
             </div>
-		}
-	</mat-list>
+            <div class="event-card-actions">
+              <a mat-stroked-button [routerLink]="['/event', event.id]">Otwórz</a>
+              <button mat-icon-button type="button" (click)="deleteEvent(event)" matTooltip="Usuń wydarzenie">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </section>
+
 </div>
