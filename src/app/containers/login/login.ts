@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { AuthService } from '../../services/auth.service';
+import { EventsService } from '../../services/events.service';
 
 @Component({
   selector: 'app-login',
@@ -15,6 +16,7 @@ import { AuthService } from '../../services/auth.service';
 export class Login {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
+  private readonly eventsService = inject(EventsService);
   private readonly router = inject(Router);
 
   readonly loginForm = this.fb.group({
@@ -32,7 +34,10 @@ export class Login {
 
     const { username, password } = this.loginForm.getRawValue();
     this.authService.login({ username, password }).subscribe({
-      next: () => this.router.navigate(['/']),
+      next: () => {
+        this.eventsService.refreshEvents();
+        this.router.navigate(['/']);
+      },
       error: () => {
         this.errorMessage = 'Nieprawidłowy login lub hasło';
       },
