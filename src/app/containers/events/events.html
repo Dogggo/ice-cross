@@ -27,7 +27,7 @@
         <p class="section-desc">Wprowadź czasy i zatwierdź rundy eliminacyjne</p>
         <div class="category-btn-list">
           @for (category of event.categories; track category.id) {
-            <a mat-stroked-button [routerLink]="['timed-eliminations', category.id]">
+            <a [disabled]="!event.startingListLocked" mat-stroked-button [routerLink]="['timed-eliminations', category.id]">
               {{ category.name }}
             </a>
           }

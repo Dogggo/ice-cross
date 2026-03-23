@@ -1,4 +1,5 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, DestroyRef, inject, signal, computed } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
@@ -53,6 +54,7 @@ export class TimedEliminations {
   private readonly fb = inject(FormBuilder);
   private readonly service = inject(TimedEliminationService);
   private readonly dialog = inject(MatDialog);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly eventId = this.route.snapshot.paramMap.get('id') ?? '';
   readonly categoryId = this.route.snapshot.paramMap.get('categoryId') ?? '';
@@ -63,6 +65,7 @@ export class TimedEliminations {
   readonly isEditMode = signal(false);
 
   readonly rowFormMap = new Map<string, FormGroup>();
+  private readonly formTick = signal(0);
 
   readonly displayedColumns = computed<string[]>(() => {
     const s = this.state();
@@ -74,19 +77,21 @@ export class TimedEliminations {
     return cols;
   });
 
-  readonly allRound1Filled = computed(() =>
-    this.participants().every((p) => {
+  readonly allRound1Filled = computed(() => {
+    this.formTick();
+    return this.participants().every((p) => {
       const val = this.rowFormMap.get(p.id)?.get('round1')?.value ?? '';
       return parseTime(val) !== null;
-    }),
-  );
+    });
+  });
 
-  readonly allRound2Filled = computed(() =>
-    this.participants().every((p) => {
+  readonly allRound2Filled = computed(() => {
+    this.formTick();
+    return this.participants().every((p) => {
       const val = this.rowFormMap.get(p.id)?.get('round2')?.value ?? '';
       return parseTime(val) !== null;
-    }),
-  );
+    });
+  });
 
   constructor() {
     this.fetchData();
@@ -117,11 +122,15 @@ export class TimedEliminations {
       const r2Disabled = res.state !== TimedEliminationState.Round2;
 
       if (!this.rowFormMap.has(p.id)) {
-        this.rowFormMap.set(p.id, this.fb.group({
+        const group = this.fb.group({
           round1: [{ value: msToTimeString(p.firstRoundTime), disabled: r1Disabled }],
           round2: [{ value: msToTimeString(p.secondRoundTime), disabled: r2Disabled }],
           resigned: [{ value: false, disabled: true }],
-        }));
+        });
+        this.rowFormMap.set(p.id, group);
+        group.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+          this.formTick.update((v) => v + 1);
+        });
       } else {
         const group = this.rowFormMap.get(p.id)!;
         group.get('round1')!.setValue(msToTimeString(p.firstRoundTime), { emitEvent: false });
