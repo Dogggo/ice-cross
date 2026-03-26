@@ -34,7 +34,7 @@ export class TimedEliminationService {
 
   confirm(eventId: string, categoryId: string): Observable<void> {
     return this.http.post<void>(
-      `${environment.apiUrl}/events/${eventId}/categories/${categoryId}/confirm`,
+      `${environment.apiUrl}/events/${eventId}/categories/${categoryId}/timed-elimination/lock`,
       {},
     );
   }

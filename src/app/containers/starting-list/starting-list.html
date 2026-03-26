@@ -102,9 +102,13 @@
 			<p style="color: #f44336; margin-top: 16px;">{{ validationError() }}</p>
 		}
 		<button mat-flat-button type="button" style="margin-top: 24px;" (click)="submitStartingList()">
-			Zatwierdz liste
+			Zapisz liste
 		</button>
 	}
+
+	<button mat-flat-button type="button" style="margin-top: 24px;" (click)="lockStartingList()">
+		Zatwierdz liste
+	</button>
 
 	@if (submitSuccess) {
 		<p style="color: green; margin-top: 8px;">Lista została zatwierdzona pomyślnie.</p>

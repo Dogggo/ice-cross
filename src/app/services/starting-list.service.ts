@@ -17,4 +17,8 @@ export class StartingListService {
   submitStartingList(eventId: string, body: CreateStartingListRequestBody): Observable<void> {
     return this.http.post<void>(`${environment.apiUrl}/events/${eventId}/starting-list`, body);
   }
+
+  lockStartingList(eventId: string): Observable<void> {
+    return this.http.post<void>(`${environment.apiUrl}/events/${eventId}/starting-list/lock`, {});
+  }
 }

@@ -9,8 +9,10 @@ import { MatTableModule } from '@angular/material/table';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { provideNativeDateAdapter } from '@angular/material/core';
+import { MatDialog } from '@angular/material/dialog';
 import { EventsService } from '../../services/events.service';
 import { StartingListService } from '../../services/starting-list.service';
+import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
 import type { GetEventDetailsResponse } from '../../contracts/events';
 import type { CreateStartingListRequestBody, GetStartingListResponse } from '../../contracts/starting-list';
 
@@ -44,6 +46,7 @@ export class StartingList {
   private readonly eventsService = inject(EventsService);
   private readonly startingListService = inject(StartingListService);
   private readonly fb = inject(FormBuilder);
+  private readonly dialog = inject(MatDialog);
 
   readonly eventId = this.route.snapshot.paramMap.get('id') ?? '';
   readonly eventName = signal('');
@@ -145,6 +148,17 @@ export class StartingList {
         this.submitSuccess = true;
         this.isReadOnly.set(true);
       },
+    });
+  }
+
+  lockStartingList(): void {
+    const ref = this.dialog.open(ConfirmDialog, {
+      data: { message: 'Czy chcesz zatwierdzic liste? Po zatwierdzeniu, nie będzie można jej edytować' },
+    });
+    ref.afterClosed().subscribe((confirmed: boolean) => {
+      if (confirmed) {
+        this.startingListService.lockStartingList(this.eventId).subscribe();
+      }
     });
   }
 
