@@ -1,0 +1,154 @@
+:host {
+  display: block;
+}
+
+.view-header {
+  margin-bottom: 24px;
+
+  h2 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 4px;
+    letter-spacing: -0.02em;
+  }
+
+  .view-subtitle {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0;
+  }
+}
+
+.loading-state {
+  padding: 48px 0;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.results-card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th {
+    padding: 10px 16px;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: rgba(0, 0, 0, 0.02);
+    border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 10px 16px;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  tr:hover td {
+    background: rgba(0, 0, 0, 0.015);
+  }
+}
+
+.order-cell {
+  width: 60px;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.bib-cell {
+  width: 70px;
+  font-weight: 600;
+}
+
+.name-cell {
+  min-width: 160px;
+}
+
+.placement-cell {
+  width: 80px;
+  font-weight: 600;
+}
+
+td.best-time {
+  background-color: rgba(16, 185, 129, 0.12) !important;
+  font-weight: 600;
+  color: #059669;
+}
+
+// Drag & drop edit mode
+.drag-col {
+  width: 40px;
+  padding: 8px 8px 8px 16px !important;
+}
+
+.drag-icon {
+  color: var(--text-secondary);
+  cursor: grab;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  opacity: 0.6;
+  transition: opacity 0.15s;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.edit-table tr.cdk-drag-preview {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  background: var(--card-bg);
+}
+
+.edit-table tr.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.edit-table .cdk-drop-list-dragging tr:not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.edit-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  padding: 10px 16px;
+  background: rgba(61, 90, 254, 0.04);
+  border-radius: 8px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(61, 90, 254, 0.12);
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: #3d5afe;
+  }
+}
+
+.actions-bar {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}

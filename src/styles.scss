@@ -85,3 +85,12 @@ body {
   border-top: 1px solid var(--border-color);
   margin: 24px 0;
 }
+
+// CSV upload tooltip — multiline, monospace content
+.csv-tooltip {
+  white-space: pre-line !important;
+  font-family: 'Roboto Mono', 'Courier New', monospace !important;
+  font-size: 0.78rem !important;
+  line-height: 1.6 !important;
+  max-width: 420px !important;
+}

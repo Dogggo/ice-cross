@@ -35,9 +35,26 @@
     width: 148px;
     margin: 6px 0;
   }
+}
 
-  td.best-time .mat-mdc-text-field-wrapper {
-    background-color: rgba(16, 185, 129, 0.12) !important;
+.row-resigned {
+  td {
+    background-color: rgba(0, 0, 0, 0.04) !important;
+    color: var(--text-secondary) !important;
+  }
+}
+
+.row-focused {
+  td {
+    background-color: color-mix(in srgb, var(--mat-sys-primary, #6200ee) 8%, transparent) !important;
+  }
+}
+
+td.best-time-cell {
+  background-color: rgba(16, 185, 129, 0.14) !important;
+
+  .mat-mdc-text-field-wrapper {
+    background-color: transparent !important;
   }
 }
 

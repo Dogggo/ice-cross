@@ -1,93 +1,62 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { TournamentBracket, BracketConfig } from '../../components/tournament-bracket/tournament-bracket';
+import { TournamentService } from '../../services/tournament.service';
+import { TournamentSettings } from './tournament-settings';
+import { TournamentLcq } from './tournament-lcq';
+import { TournamentLcqResults } from './tournament-lcq-results';
+import { TournamentRound } from './tournament-round';
+import { TournamentFinalResults } from './tournament-final-results';
+import type { TournamentState } from '../../contracts/tournament';
 
 @Component({
   selector: 'app-tournament',
-  imports: [TournamentBracket],
+  imports: [TournamentSettings, TournamentLcq, TournamentLcqResults, TournamentRound, TournamentFinalResults],
   templateUrl: './tournament.html',
   styleUrl: './tournament.scss',
 })
-export class Tournament {
+export class Tournament implements OnInit {
   private readonly route = inject(ActivatedRoute);
+  private readonly service = inject(TournamentService);
 
-  readonly tournamentId = computed(() => this.route.snapshot.paramMap.get('tournamentId') ?? '');
+  readonly eventId = this.route.snapshot.paramMap.get('id') ?? '';
+  readonly categoryId = this.route.snapshot.paramMap.get('categoryId') ?? '';
 
-  readonly bracketConfig = computed<BracketConfig>(() => {
-    const id = this.tournamentId();
-    return this.getTournamentConfig(id);
-  });
+  readonly state = signal<TournamentState | null>(null);
+  readonly isLoading = signal(true);
 
-  private getTournamentConfig(id: string): BracketConfig {
-    const configs: Record<string, BracketConfig> = {
-      'tour-1': {
-        tournamentName: 'Pary mieszane',
-        participants: [
-          { name: 'Para 1' },
-          { name: 'Para 2' },
-          { name: 'Para 3' },
-          { name: 'Para 4' },
-          { name: 'Para 5' },
-          { name: 'Para 6' },
-          { name: 'Para 7' },
-          { name: 'Para 8' },
-        ],
-      },
-      'tour-2': {
-        tournamentName: 'Sprint męski',
-        participants: [
-          { name: 'Adam K.' },
-          { name: 'Bartek L.' },
-          { name: 'Cezary M.' },
-          { name: 'Dawid N.' },
-          { name: 'Emil O.' },
-          { name: 'Filip P.' },
-          { name: 'Grzegorz R.' },
-          { name: 'Hubert S.' },
-        ],
-      },
-      'tour-3': {
-        tournamentName: 'Top 8',
-        participants: [
-          { name: 'Racer 1' },
-          { name: 'Racer 2' },
-          { name: 'Racer 3' },
-          { name: 'Racer 4' },
-          { name: 'Racer 5' },
-          { name: 'Racer 6' },
-          { name: 'Racer 7' },
-          { name: 'Racer 8' },
-        ],
-      },
-      'tour-4': {
-        tournamentName: 'Drużynowy',
-        participants: [
-          { name: 'Drużyna Alfa' },
-          { name: 'Drużyna Beta' },
-          { name: 'Drużyna Gamma' },
-          { name: 'Drużyna Delta' },
-          { name: 'Drużyna Epsilon' },
-          { name: 'Drużyna Zeta' },
-          { name: 'Drużyna Eta' },
-          { name: 'Drużyna Theta' },
-        ],
-      },
-    };
+  readonly stateSteps = [
+    { key: 'SETTINGS', label: 'Ustawienia' },
+    { key: 'LCQ', label: 'LCQ' },
+    { key: 'LCQ_RESULTS', label: 'Wyniki LCQ' },
+    { key: 'TOURNAMENT', label: 'Turniej' },
+    { key: 'TOURNAMENT_RESULTS', label: 'Wyniki końcowe' },
+  ];
 
-    return (
-      configs[id] ?? {
-        tournamentName: 'Turniej',
-        participants: [
-          { name: 'Zawodnik 1' },
-          { name: 'Zawodnik 2' },
-          { name: 'Zawodnik 3' },
-          { name: 'Zawodnik 4' },
-          { name: 'Zawodnik 5' },
-          { name: 'Zawodnik 6' },
-          { name: 'Zawodnik 7' },
-          { name: 'Zawodnik 8' },
-        ],
-      }
-    );
+  ngOnInit(): void {
+    this.loadState();
+  }
+
+  loadState(): void {
+    this.isLoading.set(true);
+    this.service.getState(this.eventId, this.categoryId).subscribe({
+      next: (res) => {
+        this.state.set(res.state);
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        if (err.status === 404) {
+          this.state.set('SETTINGS');
+        }
+        this.isLoading.set(false);
+      },
+    });
+  }
+
+  private readonly stateOrder: TournamentState[] = ['SETTINGS', 'LCQ', 'LCQ_RESULTS', 'TOURNAMENT', 'TOURNAMENT_RESULTS'];
+
+  isStepDone(stepKey: string): boolean {
+    const current = this.state();
+    if (!current) return false;
+    return this.stateOrder.indexOf(current) > this.stateOrder.indexOf(stepKey as TournamentState);
   }
 }

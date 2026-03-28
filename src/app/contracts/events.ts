@@ -32,10 +32,10 @@ export interface GetEventDetailsResponse {
     id: string;
     name: string;
     date: string; // ISO format
-    startingListLocked: boolean;
     categories: {
         id: string;
         name: string;
+        startingListLocked: boolean;
         timedElimination: {
             id: string;
             isConfirmed: boolean

@@ -63,6 +63,7 @@ export class TimedEliminations {
   readonly isSecondRoundSkipped = signal(false);
   readonly participants = signal<ParticipantRow[]>([]);
   readonly isEditMode = signal(false);
+  readonly focusedParticipantId = signal<string | null>(null);
 
   readonly rowFormMap = new Map<string, FormGroup>();
   private readonly formTick = signal(0);
@@ -70,11 +71,16 @@ export class TimedEliminations {
   readonly displayedColumns = computed<string[]>(() => {
     const s = this.state();
     const cols: string[] = [];
-    if (s === TimedEliminationState.Filled) cols.push('placement');
+    if (s === TimedEliminationState.Filled || s === TimedEliminationState.Finished) cols.push('placement');
     cols.push('bibNumber', 'name', 'round1');
     if (!this.isSecondRoundSkipped()) cols.push('round2');
-    if (this.isEditMode()) cols.push('resigned');
+    if (s === TimedEliminationState.Filled || s === TimedEliminationState.Finished || this.isEditMode()) cols.push('resigned');
     return cols;
+  });
+
+  readonly isInputActiveState = computed(() => {
+    const s = this.state();
+    return s === TimedEliminationState.Round1 || s === TimedEliminationState.Round2 || this.isEditMode();
   });
 
   readonly allRound1Filled = computed(() => {
@@ -108,13 +114,16 @@ export class TimedEliminations {
     this.isSecondRoundSkipped.set(res.isSecondRoundSkipped);
     this.isEditMode.set(false);
 
-    const sorted = [...res.participants].sort((a, b) => a.placement - b.placement);
+    const sorted = [...res.participants].sort((a, b) => {
+      if (a.resigned !== b.resigned) return a.resigned ? 1 : -1;
+      return a.placement - b.placement;
+    });
     this.participants.set(sorted.map((p) => ({
       id: p.id,
       name: p.name,
       bibNumber: p.bibNumber,
       placement: p.placement,
-      resigned: false,
+      resigned: p.resigned ?? false,
     })));
 
     sorted.forEach((p) => {
@@ -125,7 +134,7 @@ export class TimedEliminations {
         const group = this.fb.group({
           round1: [{ value: msToTimeString(p.firstRoundTime), disabled: r1Disabled }],
           round2: [{ value: msToTimeString(p.secondRoundTime), disabled: r2Disabled }],
-          resigned: [{ value: false, disabled: true }],
+          resigned: [{ value: p.resigned ?? false, disabled: true }],
         });
         this.rowFormMap.set(p.id, group);
         group.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
@@ -135,7 +144,7 @@ export class TimedEliminations {
         const group = this.rowFormMap.get(p.id)!;
         group.get('round1')!.setValue(msToTimeString(p.firstRoundTime), { emitEvent: false });
         group.get('round2')!.setValue(msToTimeString(p.secondRoundTime), { emitEvent: false });
-        group.get('resigned')!.setValue(false, { emitEvent: false });
+        group.get('resigned')!.setValue(p.resigned ?? false, { emitEvent: false });
         r1Disabled ? group.get('round1')!.disable() : group.get('round1')!.enable();
         r2Disabled ? group.get('round2')!.disable() : group.get('round2')!.enable();
         group.get('resigned')!.disable();
@@ -155,6 +164,7 @@ export class TimedEliminations {
     const participants = this.participants().map((p) => ({
       id: p.id,
       roundTime: parseTime(this.rowFormMap.get(p.id)?.get('round1')?.value ?? '') ?? 0,
+      resigned: this.rowFormMap.get(p.id)?.get('resigned')?.value ?? false,
     }));
     this.service.post(this.eventId, this.categoryId, {
       state: TimedEliminationState.Round1,
@@ -166,6 +176,7 @@ export class TimedEliminations {
     const participants = this.participants().map((p) => ({
       id: p.id,
       roundTime: parseTime(this.rowFormMap.get(p.id)?.get('round2')?.value ?? '') ?? 0,
+      resigned: this.rowFormMap.get(p.id)?.get('resigned')?.value ?? false,
     }));
     this.service.post(this.eventId, this.categoryId, {
       state: TimedEliminationState.Round2,
@@ -204,6 +215,27 @@ export class TimedEliminations {
       if (!this.isSecondRoundSkipped()) group.get('round2')!.enable();
       group.get('resigned')!.enable();
     });
+  }
+
+  setFocusedRow(id: string): void {
+    this.focusedParticipantId.set(id);
+  }
+
+  clearFocusedRow(): void {
+    this.focusedParticipantId.set(null);
+  }
+
+  isBestTime(id: string, round: 'round1' | 'round2'): boolean {
+    const s = this.state();
+    if (s !== TimedEliminationState.Filled && s !== TimedEliminationState.Finished) return false;
+    if (this.isSecondRoundSkipped()) return false;
+    const p = this.participants().find((x) => x.id === id);
+    if (!p || p.resigned) return false;
+    const group = this.rowFormMap.get(id);
+    const r1 = parseTime(group?.get('round1')?.value ?? '') ?? Infinity;
+    const r2 = parseTime(group?.get('round2')?.value ?? '') ?? Infinity;
+    if (r1 === Infinity || r2 === Infinity) return false;
+    return round === 'round1' ? r1 <= r2 : r2 < r1;
   }
 
   confirmEdit(): void {

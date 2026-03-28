@@ -1,0 +1,99 @@
+<div class="lcq-results-container">
+
+  <div class="view-header">
+    <h2>Wyniki po rundzie LCQ</h2>
+    <p class="view-subtitle">Wyniki po eliminacjach — możesz edytować kolejność przed przejściem do turnieju</p>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading-state">Trwa ładowanie wyników...</div>
+  } @else {
+
+    <!-- Normal view -->
+    @if (!isEditMode()) {
+      <div class="results-card">
+        <table class="results-table">
+          <thead>
+            <tr>
+              <th>Wynik</th>
+              <th>Nr start.</th>
+              <th>Imię i nazwisko</th>
+              <th>Wynik LCQ</th>
+              <th>Czas: Runda 1</th>
+              <th>Czas: Runda 2</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of results(); track row.id) {
+              <tr>
+                <td class="order-cell">{{ row.order }}</td>
+                <td class="bib-cell">{{ row.bibNumber }}</td>
+                <td class="name-cell">{{ row.name }}</td>
+                <td class="placement-cell">{{ row.LCQ_placement }}</td>
+                <td [class.best-time]="isBestTime(row, 'first')">{{ formatTime(row.firstRoundTime) }}</td>
+                <td [class.best-time]="isBestTime(row, 'second')">{{ formatTime(row.secondRoundTime) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="actions-bar">
+        <button mat-flat-button type="button" (click)="proceedToTournament()">
+          <mat-icon>arrow_forward</mat-icon>
+          Przejdź do turnieju
+        </button>
+        <button mat-stroked-button type="button" (click)="startEdit()">
+          <mat-icon>edit</mat-icon>
+          Edytuj
+        </button>
+      </div>
+    }
+
+    <!-- Edit mode with drag & drop -->
+    @if (isEditMode()) {
+      <div class="edit-hint">
+        <mat-icon>drag_indicator</mat-icon>
+        Przeciągnij wiersze, aby zmienić kolejność zawodników
+      </div>
+
+      <div class="results-card">
+        <table class="results-table edit-table">
+          <thead>
+            <tr>
+              <th class="drag-col"></th>
+              <th>Wynik</th>
+              <th>Nr start.</th>
+              <th>Imię i nazwisko</th>
+              <th>Wynik LCQ</th>
+            </tr>
+          </thead>
+          <tbody cdkDropList (cdkDropListDropped)="drop($event)">
+            @for (row of editableResults(); track row.id; let i = $index) {
+              <tr cdkDrag>
+                <td class="drag-col" cdkDragHandle>
+                  <mat-icon class="drag-icon">drag_indicator</mat-icon>
+                </td>
+                <td class="order-cell">{{ i + 1 }}</td>
+                <td class="bib-cell">{{ row.bibNumber }}</td>
+                <td class="name-cell">{{ row.name }}</td>
+                <td class="placement-cell">{{ row.LCQ_placement }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="actions-bar">
+        <button mat-flat-button type="button" (click)="confirmEdit()">
+          <mat-icon>check</mat-icon>
+          Zatwierdź edycję
+        </button>
+        <button mat-stroked-button type="button" (click)="cancelEdit()">
+          Anuluj
+        </button>
+      </div>
+    }
+
+  }
+</div>

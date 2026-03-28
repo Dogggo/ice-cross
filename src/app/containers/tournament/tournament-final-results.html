@@ -1,0 +1,40 @@
+<div class="final-results-container">
+
+  <div class="results-header">
+    <mat-icon class="trophy-icon">emoji_events</mat-icon>
+    <div>
+      <h2>Wyniki końcowe turnieju</h2>
+      <p class="results-subtitle">Klasyfikacja końcowa zawodników</p>
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading-state">Trwa ładowanie wyników...</div>
+  } @else {
+
+    <div class="results-card">
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>Wynik</th>
+            <th>Nr start.</th>
+            <th>Imię i nazwisko</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of results(); track row.id) {
+            <tr [class.podium-row]="row.order <= 3">
+              <td class="place-cell">
+                <span class="medal">{{ medalIcon(row.order) }}</span>
+                {{ row.order }}
+              </td>
+              <td class="bib-cell">{{ row.bibNumber }}</td>
+              <td class="name-cell">{{ row.name }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+  }
+</div>

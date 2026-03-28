@@ -1,0 +1,68 @@
+<div class="settings-card">
+  <div class="settings-header">
+    <mat-icon class="settings-icon">emoji_events</mat-icon>
+    <div>
+      <h2>Stwórz turniej</h2>
+      <p class="settings-subtitle">Skonfiguruj format i rozmiar turnieju dla tej kategorii</p>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <p class="section-label">Wielkość turnieju</p>
+    <div class="size-options">
+      @for (opt of sizeOptions; track opt) {
+        <button
+          type="button"
+          class="size-option"
+          [class.selected]="selectedSize === opt"
+          (click)="selectSize(opt)"
+        >{{ opt }}</button>
+      }
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="toggle-row">
+      <div class="toggle-label-group">
+        <span class="section-label no-margin">Runda LCQ — Short</span>
+        <span class="toggle-desc">Dodatkowa runda kwalifikacyjna przed turniejem</span>
+      </div>
+      <mat-slide-toggle [(ngModel)]="lcqEnabled" />
+    </div>
+
+    @if (lcqEnabled) {
+      <div class="lcq-settings">
+        <p class="section-label small">Wielkość rundy LCQ</p>
+        <div class="size-options">
+          @for (opt of sizeOptions; track opt) {
+            <button
+              type="button"
+              class="size-option small"
+              [class.selected]="lcqSize === opt"
+              (click)="selectLcqSize(opt)"
+            >{{ opt }}</button>
+          }
+        </div>
+        <p class="range-label">Zawodnicy LCQ po eliminacjach czasowych</p>
+        <div class="lcq-range">
+          <mat-form-field appearance="outline" class="range-field">
+            <mat-label>Od</mat-label>
+            <input matInput type="number" [(ngModel)]="lcqFrom" min="1" />
+          </mat-form-field>
+          <span class="range-separator">—</span>
+          <mat-form-field appearance="outline" class="range-field">
+            <mat-label>Do</mat-label>
+            <input matInput type="number" [(ngModel)]="lcqTo" min="1" />
+          </mat-form-field>
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="settings-actions">
+    <button mat-flat-button [disabled]="isSubmitting()" (click)="submit()">
+      <mat-icon>check</mat-icon>
+      Zatwierdź
+    </button>
+  </div>
+</div>

@@ -27,7 +27,15 @@
         <p class="section-desc">Wprowadź czasy i zatwierdź rundy eliminacyjne</p>
         <div class="category-btn-list">
           @for (category of event.categories; track category.id) {
-            <a [disabled]="!event.startingListLocked" mat-stroked-button [routerLink]="['timed-eliminations', category.id]">
+            <a
+              [disabled]="!category.startingListLocked"
+              mat-stroked-button
+              [routerLink]="['timed-eliminations', category.id]"
+              class="category-btn"
+            >
+              @if (category.timedElimination?.isConfirmed) {
+                <mat-icon class="confirmed-icon">check_circle</mat-icon>
+              }
               {{ category.name }}
             </a>
           }
@@ -42,11 +50,14 @@
         <p class="section-desc">Drabinka turniejowa dla każdej kategorii</p>
         <div class="category-btn-list">
           @for (category of event.categories; track category.id) {
-            @if (category.tournament) {
-              <a mat-stroked-button [routerLink]="['tournament', category.tournament.id]">
-                {{ category.name }}
-              </a>
-            }
+            <a
+              mat-stroked-button
+              [disabled]="!category.timedElimination?.isConfirmed"
+              [routerLink]="['tournament', category.id]"
+              class="category-btn"
+            >
+              {{ category.name }}
+            </a>
           }
         </div>
       </div>

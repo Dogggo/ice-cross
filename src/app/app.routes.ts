@@ -35,7 +35,7 @@ export const routes: Routes = [
 		canActivate: [authGuard],
 	},
 	{
-		path: 'event/:id/tournament/:tournamentId',
+		path: 'event/:id/tournament/:categoryId',
 		component: Tournament,
 		canActivate: [authGuard],
 	},

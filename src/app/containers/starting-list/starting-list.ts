@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -10,11 +10,13 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatDialog } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { EventsService } from '../../services/events.service';
 import { StartingListService } from '../../services/starting-list.service';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
 import type { GetEventDetailsResponse } from '../../contracts/events';
-import type { CreateStartingListRequestBody, GetStartingListResponse } from '../../contracts/starting-list';
+import type { CreateStartingListCategoryRequestBody, GetStartingListResponse } from '../../contracts/starting-list';
 
 export interface Participant {
   bibNumber: number | null;
@@ -36,6 +38,8 @@ export interface Participant {
     MatTableModule,
     MatCheckboxModule,
     MatDatepickerModule,
+    MatIconModule,
+    MatTooltipModule,
   ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './starting-list.html',
@@ -47,25 +51,37 @@ export class StartingList {
   private readonly startingListService = inject(StartingListService);
   private readonly fb = inject(FormBuilder);
   private readonly dialog = inject(MatDialog);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   readonly eventId = this.route.snapshot.paramMap.get('id') ?? '';
   readonly eventName = signal('');
   readonly categories = signal<GetEventDetailsResponse['categories']>([]);
   readonly participants: Record<string, Participant[]> = {};
-  readonly displayedColumns = ['nr', 'name', 'club', 'dob', 'zgoda', 'obecny'];
+  readonly displayedColumns = ['nr', 'name', 'club', 'dob', 'zgoda', 'obecny', 'actions'];
   readonly forms: Record<string, FormGroup> = {};
-  readonly isReadOnly = signal(false);
-  readonly validationError = signal('');
-  submitSuccess = false;
+  readonly lockedCategories: Record<string, boolean> = {};
+  readonly validationErrors: Record<string, string> = {};
+  readonly saveSuccess: Record<string, boolean> = {};
+
+  readonly csvTooltip = [
+    'Plik musi być w formacie CSV. Przykład formatowania:',
+    '1,Jan Kowalski,KS Górnik Katowice,1995-03-15',
+    '2,Anna Nowak,SKI Zakopane,1998-07-22',
+    '',
+    'Jeżeli nie chcesz wprowadzać numerów startowych:',
+    ',Jan Kowalski,KS Górnik Katowice,1995-03-15',
+    ',Anna Nowak,SKI Zakopane,1998-07-22',
+  ].join('\n');
 
   constructor() {
     this.eventsService.getEventById(this.eventId).subscribe((event) => {
       this.eventName.set(event.name);
       this.categories.set(event.categories);
-      event.categories.forEach((cat: GetEventDetailsResponse['categories'][number]) => {
-        if (!this.participants[cat.id]) {
-          this.participants[cat.id] = [];
-        }
+      event.categories.forEach((cat) => {
+        if (!this.participants[cat.id]) this.participants[cat.id] = [];
+        this.lockedCategories[cat.id] = false;
+        this.validationErrors[cat.id] = '';
+        this.saveSuccess[cat.id] = false;
         if (!this.forms[cat.id]) {
           this.forms[cat.id] = this.fb.group({
             name: ['', Validators.required],
@@ -77,6 +93,7 @@ export class StartingList {
 
       this.startingListService.getStartingList(this.eventId).subscribe((res: GetStartingListResponse) => {
         res.forEach((entry) => {
+          this.lockedCategories[entry.categoryId] = entry.startingListLocked;
           this.participants[entry.categoryId] = entry.participants.map((p) => ({
             bibNumber: p.bibNumber,
             name: p.name,
@@ -86,15 +103,13 @@ export class StartingList {
             present: p.present,
           }));
         });
-
-        const allFilled = this.categories().every(
-          (cat) => (this.participants[cat.id] ?? []).length > 0,
-        );
-        if (allFilled) {
-          this.isReadOnly.set(true);
-        }
+        this.cdr.markForCheck();
       });
     });
+  }
+
+  isCategoryLocked(categoryId: string): boolean {
+    return this.lockedCategories[categoryId] ?? false;
   }
 
   addParticipant(categoryId: string): void {
@@ -118,46 +133,47 @@ export class StartingList {
     this.participants[categoryId][index] = { ...this.participants[categoryId][index], ...updates };
   }
 
-  submitStartingList(): void {
-    const allValid = this.categories().every((cat: GetEventDetailsResponse['categories'][number]) => {
-      const list = this.participants[cat.id] ?? [];
-      return list.length > 0 && list.every((p) => p.bibNumber !== null);
-    });
+  removeParticipant(categoryId: string, index: number): void {
+    this.participants[categoryId] = this.participants[categoryId].filter((_, i) => i !== index);
+  }
 
-    if (!allValid) {
-      this.validationError.set('Aby zatwierdzic, wypelnij wszystkie kategorie');
+  submitStartingList(categoryId: string): void {
+    const list = this.participants[categoryId] ?? [];
+    if (list.length === 0) {
+      this.validationErrors[categoryId] = 'Lista nie może być pusta.';
       return;
     }
+    this.validationErrors[categoryId] = '';
 
-    this.validationError.set('');
-
-    const body: CreateStartingListRequestBody = this.categories().map((cat: GetEventDetailsResponse['categories'][number]) => ({
-      categoryId: cat.id,
-      participants: (this.participants[cat.id] ?? []).map((p) => ({
+    const body: CreateStartingListCategoryRequestBody =  list.map((p) => ({
         name: p.name,
         bibNumber: p.bibNumber ?? 0,
         sportClub: p.club,
         dob: p.dob,
         consent: p.consent,
         present: p.present,
-      })),
-    }));
+      }));
 
-    this.startingListService.submitStartingList(this.eventId, body).subscribe({
+    this.startingListService.submitStartingList(this.eventId, categoryId, body).subscribe({
       next: () => {
-        this.submitSuccess = true;
-        this.isReadOnly.set(true);
+        this.saveSuccess[categoryId] = true;
+        setTimeout(() => { this.saveSuccess[categoryId] = false; }, 3000);
       },
     });
   }
 
-  lockStartingList(): void {
+  lockStartingList(categoryId: string): void {
     const ref = this.dialog.open(ConfirmDialog, {
-      data: { message: 'Czy chcesz zatwierdzic liste? Po zatwierdzeniu, nie będzie można jej edytować' },
+      data: { message: 'Czy chcesz zatwierdzić listę? Po zatwierdzeniu, nie będzie można jej edytować.' },
     });
     ref.afterClosed().subscribe((confirmed: boolean) => {
       if (confirmed) {
-        this.startingListService.lockStartingList(this.eventId).subscribe();
+        this.startingListService.lockStartingList(this.eventId, categoryId).subscribe({
+          next: () => {
+            this.lockedCategories[categoryId] = true;
+            this.cdr.markForCheck();
+          },
+        });
       }
     });
   }
@@ -187,6 +203,7 @@ export class StartingList {
         ...newParticipants,
       ];
       input.value = '';
+      this.cdr.markForCheck();
     };
     reader.readAsText(file);
   }

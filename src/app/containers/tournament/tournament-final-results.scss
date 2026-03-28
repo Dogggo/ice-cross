@@ -1,0 +1,101 @@
+:host {
+  display: block;
+}
+
+.results-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 28px;
+
+  .trophy-icon {
+    font-size: 36px;
+    width: 36px;
+    height: 36px;
+    color: #f59e0b;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  h2 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 4px;
+    letter-spacing: -0.02em;
+  }
+
+  .results-subtitle {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0;
+  }
+}
+
+.loading-state {
+  padding: 48px 0;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.results-card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+  max-width: 600px;
+}
+
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th {
+    padding: 10px 20px;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: rgba(0, 0, 0, 0.02);
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  td {
+    padding: 12px 20px;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  tr.podium-row td {
+    font-weight: 600;
+  }
+}
+
+.place-cell {
+  width: 80px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.medal {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.bib-cell {
+  width: 80px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.name-cell {
+  min-width: 160px;
+}

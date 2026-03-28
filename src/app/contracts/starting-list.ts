@@ -4,6 +4,7 @@ export interface GetStartingListPathParams {
 
 export type GetStartingListResponse = {
     categoryId: string;
+    startingListLocked: boolean;
     participants: {
         id: string;
         name: string;
@@ -15,9 +16,7 @@ export type GetStartingListResponse = {
     }[];
 }[];
 
-export type CreateStartingListRequestBody = {
-    categoryId: string;
-    participants: {
+export type CreateStartingListCategoryRequestBody = {
         name: string;
         bibNumber: number;
         sportClub: string;
@@ -25,4 +24,3 @@ export type CreateStartingListRequestBody = {
         consent: boolean;
         present: boolean;
     }[];
-}[];

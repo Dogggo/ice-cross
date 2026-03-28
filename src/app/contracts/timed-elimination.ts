@@ -20,6 +20,7 @@ export interface GetTimedEliminationResponse {
         firstRoundTime: number; // timestamp in milliseconds
         secondRoundTime: number; // timestamp in milliseconds
         placement: number;
+        resigned: boolean;
     }[]
 }
 
@@ -33,6 +34,7 @@ export interface PostTimedEliminationRequestBody {
     participants: {
         id: string;
         roundTime: number; // timestamp in milliseconds
+        resigned: boolean;
     }[]
 }
 
@@ -46,6 +48,7 @@ export interface PutTimedEliminationRequestBody {
         id: string;
         firstRoundTime: number; // timestamp in milliseconds
         secondRoundTime: number; // timestamp in milliseconds
+        resigned: boolean
     }[]
 }
 

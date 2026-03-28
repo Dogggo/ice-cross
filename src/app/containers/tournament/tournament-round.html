@@ -1,0 +1,84 @@
+<div class="round-container">
+
+  @if (isLoading()) {
+    <div class="loading-state">Trwa ładowanie rundy...</div>
+  } @else {
+
+    <div class="round-header">
+      <h2>Runda {{ currentRound() }}</h2>
+      <span class="round-badge" [class.final-badge]="isFinalRound()">
+        {{ isFinalRound() ? 'Finał' : 'Eliminacje' }}
+      </span>
+    </div>
+
+    @if (groups().length === 0) {
+      <p class="empty-state">Brak biegów do wyświetlenia.</p>
+    } @else {
+      <div class="heats-grid">
+        @for (group of processedGroups(); track $index; let gi = $index) {
+          <div class="heat-card" [class.heat-valid]="groupValidities()[gi]" [class.heat-invalid]="groups()[gi].participants.length > 0 && !groupValidities()[gi]">
+            <div class="heat-header">
+              <span class="heat-label">Bieg {{ gi + 1 }}</span>
+              @if (groupValidities()[gi]) {
+                <span class="heat-badge valid">✓</span>
+              } @else if (groups()[gi].participants.length > 0) {
+                <span class="heat-badge invalid">!</span>
+              }
+            </div>
+            <table class="heat-table">
+              <thead>
+                <tr>
+                  <th>Nr start.</th>
+                  <th>Imię i nazwisko</th>
+                  <th>Wynik biegu</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of group.rows; track $index) {
+                  <tr [class.empty-row]="!row.id">
+                    <td class="bib-cell">{{ row.bibNumber ?? '' }}</td>
+                    <td class="name-cell">{{ row.name }}</td>
+                    <td class="placement-cell">
+                      @if (row.id) {
+                        <select
+                          class="placement-select"
+                          [value]="getPlacement(row.id)"
+                          (change)="updatePlacement(row.id, $event)"
+                        >
+                          <option value="">—</option>
+                          @for (opt of group.options; track opt) {
+                            <option [value]="opt">{{ opt }}</option>
+                          }
+                        </select>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    }
+
+    <div class="actions-bar">
+      @if (saveSuccess()) {
+        <span class="save-success">
+          <mat-icon>check_circle</mat-icon>
+          Zapisano pomyślnie
+        </span>
+      }
+      <div class="action-buttons">
+        <button mat-stroked-button type="button" (click)="save()">
+          <mat-icon>save</mat-icon>
+          Zapisz rundę
+        </button>
+        <button mat-flat-button type="button" [disabled]="!isAllValid()" (click)="confirmRound()">
+          <mat-icon>{{ isFinalRound() ? 'emoji_events' : 'arrow_forward' }}</mat-icon>
+          {{ isFinalRound() ? 'Zatwierdź turniej' : 'Zatwierdź rundę' }}
+        </button>
+      </div>
+    </div>
+
+  }
+</div>

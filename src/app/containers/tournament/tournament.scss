@@ -5,20 +5,111 @@
 
 .tournament-container {
   padding: 32px;
-  max-width: 1300px;
+  max-width: 1200px;
   margin: 0 auto;
+}
 
-  h1 {
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin: 0 0 6px;
-    letter-spacing: -0.02em;
-  }
+.loading-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 0;
 
-  p {
+  .loading-text {
     color: var(--text-secondary);
-    font-size: 0.875rem;
-    margin: 0 0 24px;
+    font-size: 0.9rem;
   }
 }
+
+// ── Progress stepper ──────────────────────────────────────────────────────────
+
+.state-progress {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  margin-bottom: 36px;
+  background: var(--card-bg);
+  border-radius: 14px;
+  box-shadow: var(--card-shadow);
+  padding: 20px 28px;
+  overflow-x: auto;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 90px;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 16px;
+    left: calc(50% + 22px);
+    right: calc(-50% + 22px);
+    height: 2px;
+    background: var(--border-color);
+    transition: background 0.3s;
+  }
+
+  &:last-child::after {
+    display: none;
+  }
+
+  .step-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  }
+
+  .step-num { font-size: 0.8rem; }
+  .step-check { font-size: 0.75rem; }
+
+  .step-label {
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-align: center;
+    white-space: nowrap;
+    transition: color 0.2s, font-weight 0.2s;
+  }
+
+  &.active {
+    .step-dot {
+      background: #3d5afe;
+      color: #fff;
+      box-shadow: 0 2px 10px rgba(61, 90, 254, 0.4);
+    }
+    .step-label {
+      color: #3d5afe;
+      font-weight: 700;
+    }
+  }
+
+  &.done {
+    .step-dot {
+      background: rgba(16, 185, 129, 0.15);
+      color: #059669;
+    }
+    .step-label { color: #059669; }
+    &::after { background: rgba(16, 185, 129, 0.4); }
+  }
+}
+
+// ── Content area ──────────────────────────────────────────────────────────────
+
+.state-content {
+  // sub-components handle their own layout
+}
+

@@ -1,5 +1,65 @@
 <div class="tournament-container">
-  <h1>{{ bracketConfig().tournamentName }}</h1>
-  <p>Kliknij na mecz, aby edytować wynik</p>
-  <app-tournament-bracket [config]="bracketConfig()" />
+
+  @if (isLoading()) {
+    <div class="loading-wrapper">
+      <p class="loading-text">Trwa ładowanie turnieju...</p>
+    </div>
+  } @else {
+
+    <!-- Progress stepper -->
+    <div class="state-progress">
+      @for (step of stateSteps; track step.key) {
+        <div class="step" [class.active]="state() === step.key" [class.done]="isStepDone(step.key)">
+          <div class="step-dot">
+            @if (isStepDone(step.key)) {
+              <span class="step-check">✓</span>
+            } @else {
+              <span class="step-num">{{ $index + 1 }}</span>
+            }
+          </div>
+          <span class="step-label">{{ step.label }}</span>
+        </div>
+      }
+    </div>
+
+    <div class="state-content">
+      @switch (state()) {
+        @case ('SETTINGS') {
+          <app-tournament-settings
+            [eventId]="eventId"
+            [categoryId]="categoryId"
+            (settled)="loadState()"
+          />
+        }
+        @case ('LCQ') {
+          <app-tournament-lcq
+            [eventId]="eventId"
+            [categoryId]="categoryId"
+            (stateChange)="loadState()"
+          />
+        }
+        @case ('LCQ_RESULTS') {
+          <app-tournament-lcq-results
+            [eventId]="eventId"
+            [categoryId]="categoryId"
+            (stateChange)="loadState()"
+          />
+        }
+        @case ('TOURNAMENT') {
+          <app-tournament-round
+            [eventId]="eventId"
+            [categoryId]="categoryId"
+            (stateChange)="loadState()"
+          />
+        }
+        @case ('TOURNAMENT_RESULTS') {
+          <app-tournament-final-results
+            [eventId]="eventId"
+            [categoryId]="categoryId"
+          />
+        }
+      }
+    </div>
+
+  }
 </div>
