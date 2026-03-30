@@ -132,6 +132,31 @@
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+  align-items: center;
+}
+
+.lock-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lock-info-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  cursor: help;
+  color: #f59e0b;
+  transition: color 0.2s, transform 0.2s;
+  flex-shrink: 0;
+
+  &:hover {
+    transform: scale(1.15);
+  }
+
+  &.lock-info-icon--ready {
+    color: #22c55e;
+  }
 }
 
 .validation-error,

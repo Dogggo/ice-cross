@@ -109,6 +109,13 @@
 					}
 				}
 
+				@case ('Finished') {
+					<button mat-stroked-button type="button" class="pdf-btn" (click)="downloadPdf()">
+						<mat-icon>picture_as_pdf</mat-icon>
+						Pobierz PDF
+					</button>
+				}
+
 			}
 		</div>
 	}

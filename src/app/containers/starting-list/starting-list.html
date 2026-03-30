@@ -151,10 +151,20 @@
 								<mat-icon>save</mat-icon>
 								Zapisz listę
 							</button>
-							<button mat-stroked-button type="button" (click)="lockStartingList(category.id)">
+						<div class="lock-btn-group">
+							<button mat-stroked-button type="button"
+								[disabled]="!canLockCategory(category.id)"
+								(click)="lockStartingList(category.id)">
 								<mat-icon>lock</mat-icon>
 								Zatwierdź listę
 							</button>
+							<mat-icon
+								class="lock-info-icon"
+								[class.lock-info-icon--ready]="canLockCategory(category.id)"
+								[matTooltip]="lockInfoTooltip(category.id)"
+								matTooltipPosition="above"
+							>{{ canLockCategory(category.id) ? 'check_circle' : 'info' }}</mat-icon>
+						</div>
 						</div>
 					</div>
 				} @else {

@@ -8,9 +8,11 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
 import { HttpErrorResponse } from '@angular/common/http';
 import { TimedEliminationService } from '../../services/timed-elimination.service';
 import { ToastService } from '../../services/toast.service';
+import { EventsService } from '../../services/events.service';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
 import type { GetTimedEliminationResponse } from '../../contracts/timed-elimination';
 import { TimedEliminationState } from '../../contracts/timed-elimination';
@@ -47,6 +49,7 @@ export interface ParticipantRow {
     MatButtonModule,
     MatCheckboxModule,
     MatDialogModule,
+    MatIconModule,
   ],
   templateUrl: './timed-eliminations.html',
   styleUrl: './timed-eliminations.scss',
@@ -58,6 +61,7 @@ export class TimedEliminations {
   private readonly dialog = inject(MatDialog);
   private readonly destroyRef = inject(DestroyRef);
   private readonly toast = inject(ToastService);
+  private readonly eventsService = inject(EventsService);
 
   readonly eventId = this.route.snapshot.paramMap.get('id') ?? '';
   readonly categoryId = this.route.snapshot.paramMap.get('categoryId') ?? '';
@@ -67,6 +71,8 @@ export class TimedEliminations {
   readonly participants = signal<ParticipantRow[]>([]);
   readonly isEditMode = signal(false);
   readonly focusedParticipantId = signal<string | null>(null);
+  readonly eventName = signal('');
+  readonly categoryName = signal('');
 
   readonly rowFormMap = new Map<string, FormGroup>();
   private readonly formTick = signal(0);
@@ -104,6 +110,11 @@ export class TimedEliminations {
 
   constructor() {
     this.fetchData();
+    this.eventsService.getEventById(this.eventId).subscribe((event) => {
+      this.eventName.set(event.name);
+      const cat = event.categories.find((c) => c.id === this.categoryId);
+      this.categoryName.set(cat?.name ?? '');
+    });
   }
 
   fetchData(): void {
@@ -280,6 +291,96 @@ export class TimedEliminations {
           this.service.reset(this.eventId, this.categoryId).subscribe(() => this.fetchData());
         }
       });
+  }
+
+  downloadPdf(): void {
+    const isSkipped = this.isSecondRoundSkipped();
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('pl-PL', { day: '2-digit', month: 'long', year: 'numeric' });
+    const timestampStr = now.toLocaleString('pl-PL');
+
+    const medalFor = (placement: number): string => {
+      if (placement === 1) return '🥇';
+      if (placement === 2) return '🥈';
+      if (placement === 3) return '🥉';
+      return '';
+    };
+
+    const rows = this.participants().map((p) => {
+      const r1Val = this.rowFormMap.get(p.id)?.get('round1')?.value ?? '—';
+      const r2Val = isSkipped ? null : (this.rowFormMap.get(p.id)?.get('round2')?.value ?? '—');
+      const b1 = this.isBestTime(p.id, 'round1');
+      const b2 = this.isBestTime(p.id, 'round2');
+      const medal = medalFor(p.placement);
+      const placementDisplay = p.placement != null ? String(p.placement) : '-';
+      const r2Cell = isSkipped ? '' : `<td class="col-time${b2 ? ' best-time' : ''}">${r2Val ?? '—'}</td>`;
+      return `<tr class="${p.resigned ? 'row-resigned' : ''}">
+        <td class="col-place"><span class="medal">${medal}</span><span class="place-num">${placementDisplay}</span></td>
+        <td class="col-bib">${p.bibNumber}</td>
+        <td class="col-name name-cell">${p.name}</td>
+        <td class="col-time${b1 ? ' best-time' : ''}">${r1Val}</td>
+        ${r2Cell}
+      </tr>`;
+    }).join('');
+
+    const r2Header = isSkipped ? '' : '<th class="col-time">Runda 2</th>';
+    const legendHtml = isSkipped ? '' : `
+      <div class="legend-row">
+        <div class="legend-item"><span class="legend-star">★</span>Lepszy czas zawodnika (uwzględniany przy rozstawieniu)</div>
+        <div class="legend-item ml-auto">DNS — zawodnik wycofany z rywalizacji</div>
+      </div>`;
+
+    const categoryName = this.categoryName() || 'Kategoria';
+    const eventName = this.eventName();
+
+    const html = `<!DOCTYPE html><html lang="pl"><head><meta charset="utf-8">
+<title>Eliminacje Czasowe — ${categoryName}</title><style>
+@page{margin:16mm 14mm 20mm}*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;font-size:10.5pt;color:#1a2744;background:#fff}
+.header{background:#1a2744;color:#fff;padding:22px 28px 20px;border-radius:8px;margin-bottom:26px;display:flex;justify-content:space-between;align-items:flex-start}
+.header-badge{font-size:7pt;text-transform:uppercase;letter-spacing:2.5px;color:rgba(255,255,255,.45);margin-bottom:7px}
+.header-title{font-size:20pt;font-weight:700;letter-spacing:-.5px;line-height:1.15;margin-top:2px}
+.header-event{font-size:10.5pt;color:rgba(255,255,255,.65);margin-top:6px}
+.header-right{text-align:right;font-size:8pt;color:rgba(255,255,255,.45);line-height:1.9;flex-shrink:0;padding-left:24px}
+.header-right strong{display:block;font-size:10pt;color:rgba(255,255,255,.85);font-weight:600;margin-bottom:2px}
+table{width:100%;border-collapse:collapse}
+th{padding:10px 14px;text-align:left;font-size:7pt;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#5a7184;background:#f0f4f8;border-bottom:2px solid #dde3ea}
+td{padding:9px 14px;border-bottom:1px solid #edf0f5;font-size:10pt;vertical-align:middle}
+tr:nth-child(even) td{background:#f9fbfd}tr:last-child td{border-bottom:none}
+.col-place{width:62px;font-weight:700}.col-bib{width:46px;color:#8a9bb0;font-size:9pt}
+.col-name{font-weight:500}.col-time{font-family:'Consolas','Courier New',monospace;font-size:9.5pt;white-space:nowrap}
+.best-time{color:#16a34a;font-weight:700}.best-time::after{content:' ★';font-size:8pt}
+.medal{font-size:12pt;margin-right:2px}.place-num{font-size:10.5pt}
+.row-resigned td{background:#fafafa!important;color:#b8c4ce!important}
+.row-resigned .name-cell::after{content:' — DNS';font-size:8.5pt;color:#b8c4ce;font-style:italic}
+.legend-row{margin-top:14px;display:flex;gap:16px;font-size:8pt;color:#7a8ea0;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:5px}.ml-auto{margin-left:auto}
+.legend-star{color:#16a34a;font-size:9pt;font-weight:700;margin-right:2px}
+.footer{margin-top:22px;padding-top:11px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;font-size:7.5pt;color:#9aa8b5}
+@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style></head><body>
+<div class="header">
+  <div class="header-left">
+    <div class="header-badge">Ice Cross &mdash; Eliminacje Czasowe</div>
+    <div class="header-title">${categoryName}</div>
+    <div class="header-event">${eventName}</div>
+  </div>
+  <div class="header-right"><strong>${dateStr}</strong>Wygenerowano przez<br>system Ice Cross</div>
+</div>
+<table>
+  <thead><tr><th class="col-place">Wynik</th><th class="col-bib">Nr</th><th class="col-name">Imię i nazwisko</th><th class="col-time">Runda 1</th>${r2Header}</tr></thead>
+  <tbody>${rows}</tbody>
+</table>
+${legendHtml}
+<div class="footer"><span>Ice Cross &mdash; System zarządzania zawodami</span><span>${timestampStr}</span></div>
+<script>window.onload=function(){window.print()}<\/script>
+</body></html>`;
+
+    const win = window.open('', '_blank', 'width=960,height=700');
+    if (win) {
+      win.document.write(html);
+      win.document.close();
+    }
   }
 }
 

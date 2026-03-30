@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, inject, signal } from '@angular/core';
+﻿import { ChangeDetectorRef, Component, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -64,6 +64,8 @@ export class StartingList {
   readonly forms: Record<string, FormGroup> = {};
   readonly lockedCategories: Record<string, boolean> = {};
   readonly validationErrors: Record<string, string> = {};
+  /** Count of participants with both present+consent flag, from the last server response */
+  readonly savedEligibleCount: Record<string, number> = {};
 
   readonly csvTooltip = [
     'Plik musi być w formacie CSV. Przykład formatowania:',
@@ -83,6 +85,7 @@ export class StartingList {
         if (!this.participants[cat.id]) this.participants[cat.id] = [];
         this.lockedCategories[cat.id] = false;
         this.validationErrors[cat.id] = '';
+        this.savedEligibleCount[cat.id] = 0;
         if (!this.forms[cat.id]) {
           this.forms[cat.id] = this.fb.group({
             name: ['', Validators.required],
@@ -93,24 +96,41 @@ export class StartingList {
       });
 
       this.startingListService.getStartingList(this.eventId).subscribe((res: GetStartingListResponse) => {
-        res.forEach((entry) => {
-          this.lockedCategories[entry.categoryId] = entry.startingListLocked;
-          this.participants[entry.categoryId] = entry.participants.map((p) => ({
-            bibNumber: p.bibNumber,
-            name: p.name,
-            club: p.sportClub,
-            dob: p.dob,
-            consent: p.consent,
-            present: p.present,
-          }));
-        });
-        this.cdr.markForCheck();
+        this.applyStartingListResponse(res);
       });
     });
   }
 
+  private applyStartingListResponse(res: GetStartingListResponse): void {
+    res.forEach((entry) => {
+      this.lockedCategories[entry.categoryId] = entry.startingListLocked;
+      this.participants[entry.categoryId] = entry.participants.map((p) => ({
+        bibNumber: p.bibNumber,
+        name: p.name,
+        club: p.sportClub,
+        dob: p.dob,
+        consent: p.consent,
+        present: p.present,
+      }));
+      this.savedEligibleCount[entry.categoryId] = entry.participants.filter((p) => p.present && p.consent).length;
+    });
+    this.cdr.markForCheck();
+  }
+
   isCategoryLocked(categoryId: string): boolean {
     return this.lockedCategories[categoryId] ?? false;
+  }
+
+  canLockCategory(categoryId: string): boolean {
+    return (this.savedEligibleCount[categoryId] ?? 0) >= 4;
+  }
+
+  lockInfoTooltip(categoryId: string): string {
+    const count = this.savedEligibleCount[categoryId] ?? 0;
+    if (count >= 4) {
+      return `Lista spełnia warunki — ${count} uczestników jest obecnych i ma podpisaną zgodę.`;
+    }
+    return `Zapisz listę, aby zaktualizować stan. Potrzebne są co najmniej 4 osoby z zaznaczonymi polami „Obecny” i „Zgoda”. Wg ostatniego zapisu: ${count} z 4.`;
   }
 
   addParticipant(categoryId: string): void {
@@ -146,17 +166,22 @@ export class StartingList {
     }
     this.validationErrors[categoryId] = '';
 
-    const body: CreateStartingListCategoryRequestBody =  list.map((p) => ({
-        name: p.name,
-        bibNumber: p.bibNumber ?? 0,
-        sportClub: p.club,
-        dob: p.dob,
-        consent: p.consent,
-        present: p.present,
-      }));
+    const body: CreateStartingListCategoryRequestBody = list.map((p) => ({
+      name: p.name,
+      bibNumber: p.bibNumber ?? 0,
+      sportClub: p.club,
+      dob: p.dob,
+      consent: p.consent,
+      present: p.present,
+    }));
 
     this.startingListService.submitStartingList(this.eventId, categoryId, body).subscribe({
-      next: () => this.toast.success('Lista zapisana pomyślnie'),
+      next: () => {
+        this.toast.success('Lista zapisana pomyślnie');
+        this.startingListService.getStartingList(this.eventId).subscribe((res: GetStartingListResponse) => {
+          this.applyStartingListResponse(res);
+        });
+      },
       error: (err: HttpErrorResponse) => this.toast.error(err),
     });
   }
@@ -209,4 +234,3 @@ export class StartingList {
     reader.readAsText(file);
   }
 }
-
