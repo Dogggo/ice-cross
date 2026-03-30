@@ -146,12 +146,6 @@
 								{{ validationErrors[category.id] }}
 							</p>
 						}
-						@if (saveSuccess[category.id]) {
-							<p class="save-success">
-								<mat-icon class="msg-icon">check_circle_outline</mat-icon>
-								Lista zapisana pomyślnie.
-							</p>
-						}
 						<div class="category-action-buttons">
 							<button mat-flat-button type="button" (click)="submitStartingList(category.id)">
 								<mat-icon>save</mat-icon>

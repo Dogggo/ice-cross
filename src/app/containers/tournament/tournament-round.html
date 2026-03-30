@@ -42,12 +42,11 @@
                       @if (row.id) {
                         <select
                           class="placement-select"
-                          [value]="getPlacement(row.id)"
                           (change)="updatePlacement(row.id, $event)"
                         >
-                          <option value="">—</option>
+                          <option value="" [selected]="getPlacement(row.id) === ''">—</option>
                           @for (opt of group.options; track opt) {
-                            <option [value]="opt">{{ opt }}</option>
+                            <option [value]="opt" [selected]="getPlacement(row.id) === opt">{{ opt }}</option>
                           }
                         </select>
                       }
@@ -62,12 +61,6 @@
     }
 
     <div class="actions-bar">
-      @if (saveSuccess()) {
-        <span class="save-success">
-          <mat-icon>check_circle</mat-icon>
-          Zapisano pomyślnie
-        </span>
-      }
       <div class="action-buttons">
         <button mat-stroked-button type="button" (click)="save()">
           <mat-icon>save</mat-icon>

@@ -94,3 +94,9 @@ body {
   line-height: 1.6 !important;
   max-width: 420px !important;
 }
+
+// Toast notifications
+.snack-error .mdc-snackbar__surface {
+  background-color: #c62828 !important;
+  color: #fff !important;
+}

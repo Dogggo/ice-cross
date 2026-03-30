@@ -6,7 +6,9 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
+import { ToastService } from '../../services/toast.service';
 import { TournamentService } from '../../services/tournament.service';
 
 const SIZE_OPTIONS = [4, 8, 16, 32, 64] as const;
@@ -33,6 +35,7 @@ export class TournamentSettings {
 
   private readonly service = inject(TournamentService);
   private readonly dialog = inject(MatDialog);
+  private readonly toast = inject(ToastService);
 
   readonly sizeOptions = SIZE_OPTIONS;
   readonly isSubmitting = signal(false);
@@ -69,9 +72,13 @@ export class TournamentSettings {
         this.service.createSettings(this.eventId, this.categoryId, body).subscribe({
           next: () => {
             this.isSubmitting.set(false);
+            this.toast.success('Ustawienia turniejowe zatwierdzone');
             this.settled.emit();
           },
-          error: () => this.isSubmitting.set(false),
+          error: (err: HttpErrorResponse) => {
+            this.isSubmitting.set(false);
+            this.toast.error(err);
+          },
         });
       });
   }

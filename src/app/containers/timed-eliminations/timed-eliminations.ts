@@ -8,7 +8,9 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { HttpErrorResponse } from '@angular/common/http';
 import { TimedEliminationService } from '../../services/timed-elimination.service';
+import { ToastService } from '../../services/toast.service';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
 import type { GetTimedEliminationResponse } from '../../contracts/timed-elimination';
 import { TimedEliminationState } from '../../contracts/timed-elimination';
@@ -55,6 +57,7 @@ export class TimedEliminations {
   private readonly service = inject(TimedEliminationService);
   private readonly dialog = inject(MatDialog);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly toast = inject(ToastService);
 
   readonly eventId = this.route.snapshot.paramMap.get('id') ?? '';
   readonly categoryId = this.route.snapshot.paramMap.get('categoryId') ?? '';
@@ -169,7 +172,10 @@ export class TimedEliminations {
     this.service.post(this.eventId, this.categoryId, {
       state: TimedEliminationState.Round1,
       participants,
-    }).subscribe(() => this.fetchData());
+    }).subscribe({
+      next: () => { this.toast.success('Runda 1 zatwierdzona'); this.fetchData(); },
+      error: (err: HttpErrorResponse) => this.toast.error(err),
+    });
   }
 
   confirmRound2(): void {
@@ -181,7 +187,10 @@ export class TimedEliminations {
     this.service.post(this.eventId, this.categoryId, {
       state: TimedEliminationState.Round2,
       participants,
-    }).subscribe(() => this.fetchData());
+    }).subscribe({
+      next: () => { this.toast.success('Runda 2 zatwierdzona'); this.fetchData(); },
+      error: (err: HttpErrorResponse) => this.toast.error(err),
+    });
   }
 
   skipSecondRound(): void {
@@ -192,7 +201,10 @@ export class TimedEliminations {
       .afterClosed()
       .subscribe((confirmed) => {
         if (confirmed) {
-          this.service.skipSecondRound(this.eventId, this.categoryId).subscribe(() => this.fetchData());
+          this.service.skipSecondRound(this.eventId, this.categoryId).subscribe({
+            next: () => { this.toast.success('Pominięto drugą rundę'); this.fetchData(); },
+            error: (err: HttpErrorResponse) => this.toast.error(err),
+          });
         }
       });
   }
@@ -203,7 +215,10 @@ export class TimedEliminations {
       .afterClosed()
       .subscribe((confirmed) => {
         if (confirmed) {
-          this.service.confirm(this.eventId, this.categoryId).subscribe(() => this.fetchData());
+          this.service.confirm(this.eventId, this.categoryId).subscribe({
+            next: () => { this.toast.success('Wyniki zatwierdzone'); this.fetchData(); },
+            error: (err: HttpErrorResponse) => this.toast.error(err),
+          });
         }
       });
   }
@@ -245,7 +260,10 @@ export class TimedEliminations {
       secondRoundTime: parseTime(this.rowFormMap.get(p.id)?.get('round2')?.value ?? '') ?? 0,
       resigned: this.rowFormMap.get(p.id)?.get('resigned')?.value ?? false,
     }));
-    this.service.put(this.eventId, this.categoryId, { participants }).subscribe(() => this.fetchData());
+    this.service.put(this.eventId, this.categoryId, { participants }).subscribe({
+      next: () => { this.toast.success('Zmiany zapisane'); this.fetchData(); },
+      error: (err: HttpErrorResponse) => this.toast.error(err),
+    });
   }
 
   resetElimination(): void {

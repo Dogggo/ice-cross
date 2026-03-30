@@ -3,7 +3,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
+import { ToastService } from '../../services/toast.service';
 import { TournamentService } from '../../services/tournament.service';
 import type { LCQResultEntry } from '../../contracts/tournament';
 
@@ -28,6 +30,7 @@ export class TournamentLcqResults implements OnInit {
 
   private readonly service = inject(TournamentService);
   private readonly dialog = inject(MatDialog);
+  private readonly toast = inject(ToastService);
 
   readonly isLoading = signal(true);
   readonly isEditMode = signal(false);
@@ -71,9 +74,13 @@ export class TournamentLcqResults implements OnInit {
 
   confirmEdit(): void {
     const orders = this.editableResults().map((r) => ({ participantId: r.id, order: r.order }));
-    this.service.putLCQResults(this.eventId, this.categoryId, { orders }).subscribe(() => {
-      this.isEditMode.set(false);
-      this.loadData();
+    this.service.putLCQResults(this.eventId, this.categoryId, { orders }).subscribe({
+      next: () => {
+        this.toast.success('Kolejność zapisana');
+        this.isEditMode.set(false);
+        this.loadData();
+      },
+      error: (err: HttpErrorResponse) => this.toast.error(err),
     });
   }
 
@@ -88,8 +95,12 @@ export class TournamentLcqResults implements OnInit {
       .subscribe((confirmed: boolean) => {
         if (!confirmed) return;
         const orders = this.results().map((r) => ({ participantId: r.id, order: r.order }));
-        this.service.postLCQResults(this.eventId, this.categoryId, { orders }).subscribe(() => {
-          this.stateChange.emit();
+        this.service.postLCQResults(this.eventId, this.categoryId, { orders }).subscribe({
+          next: () => {
+            this.toast.success('Przejście do turnieju zatwierdzone');
+            this.stateChange.emit();
+          },
+          error: (err: HttpErrorResponse) => this.toast.error(err),
         });
       });
   }

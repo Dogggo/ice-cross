@@ -10,7 +10,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { HttpErrorResponse } from '@angular/common/http';
 import { EventsService } from '../../services/events.service';
+import { ToastService } from '../../services/toast.service';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
 import type { Event } from '../../contracts/events';
 
@@ -35,6 +37,7 @@ export class Dashboard {
   private readonly fb = inject(FormBuilder);
   private readonly eventsService = inject(EventsService);
   private readonly dialog = inject(MatDialog);
+  private readonly toast = inject(ToastService);
 
   readonly events = this.eventsService.events;
 
@@ -82,13 +85,17 @@ export class Dashboard {
       name: name.trim(),
       date: date.toISOString().split('T')[0],
       categories: normalizedCategories,
-    }).subscribe(() => {
-      this.eventForm.controls.name.setValue('');
-      this.eventForm.controls.date.setValue(null);
-      this.categoriesFormArray.clear();
-      this.addCategoryField();
-      this.eventForm.markAsPristine();
-      this.eventForm.markAsUntouched();
+    }).subscribe({
+      next: () => {
+        this.eventForm.controls.name.setValue('');
+        this.eventForm.controls.date.setValue(null);
+        this.categoriesFormArray.clear();
+        this.addCategoryField();
+        this.eventForm.markAsPristine();
+        this.eventForm.markAsUntouched();
+        this.toast.success('Wydarzenie utworzone');
+      },
+      error: (err: HttpErrorResponse) => this.toast.error(err),
     });
   }
 

@@ -2,7 +2,9 @@ import { Component, Input, Output, EventEmitter, OnInit, inject, signal, compute
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
+import { ToastService } from '../../services/toast.service';
 import { TournamentService } from '../../services/tournament.service';
 import type { LCQGroup, PlacementEntry, RacePlacement } from '../../contracts/tournament';
 
@@ -31,9 +33,9 @@ export class TournamentLcq implements OnInit {
 
   private readonly service = inject(TournamentService);
   private readonly dialog = inject(MatDialog);
+  private readonly toast = inject(ToastService);
 
   readonly isLoading = signal(true);
-  readonly saveSuccess = signal(false);
   readonly groups = signal<LCQGroup[]>([]);
   readonly placements = signal<Record<string, string>>({});
 
@@ -103,9 +105,9 @@ export class TournamentLcq implements OnInit {
   }
 
   save(): void {
-    this.service.putLCQ(this.eventId, this.categoryId, { placements: this.buildPlacements(false) }).subscribe(() => {
-      this.saveSuccess.set(true);
-      setTimeout(() => this.saveSuccess.set(false), 3000);
+    this.service.putLCQ(this.eventId, this.categoryId, { placements: this.buildPlacements(false) }).subscribe({
+      next: () => this.toast.success('Zapisano pomyślnie'),
+      error: (err: HttpErrorResponse) => this.toast.error(err),
     });
   }
 
@@ -115,8 +117,12 @@ export class TournamentLcq implements OnInit {
       .afterClosed()
       .subscribe((confirmed: boolean) => {
         if (!confirmed) return;
-        this.service.postLCQ(this.eventId, this.categoryId, { placements: this.buildPlacements(true) }).subscribe(() => {
-          this.stateChange.emit();
+        this.service.postLCQ(this.eventId, this.categoryId, { placements: this.buildPlacements(true) }).subscribe({
+          next: () => {
+            this.toast.success('LCQ zatwierdzone');
+            this.stateChange.emit();
+          },
+          error: (err: HttpErrorResponse) => this.toast.error(err),
         });
       });
   }

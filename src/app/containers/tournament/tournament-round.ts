@@ -2,7 +2,9 @@ import { Component, Input, Output, EventEmitter, OnInit, inject, signal, compute
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
+import { ToastService } from '../../services/toast.service';
 import { TournamentService } from '../../services/tournament.service';
 import type { TournamentGroup, PlacementEntry, RacePlacement } from '../../contracts/tournament';
 
@@ -30,9 +32,9 @@ export class TournamentRound implements OnInit {
 
   private readonly service = inject(TournamentService);
   private readonly dialog = inject(MatDialog);
+  private readonly toast = inject(ToastService);
 
   readonly isLoading = signal(true);
-  readonly saveSuccess = signal(false);
   readonly currentRound = signal(0);
   readonly groups = signal<TournamentGroup[]>([]);
   readonly placements = signal<Record<string, string>>({});
@@ -105,9 +107,9 @@ export class TournamentRound implements OnInit {
   }
 
   save(): void {
-    this.service.putCurrentRound(this.eventId, this.categoryId, { placements: this.buildPlacements() }).subscribe(() => {
-      this.saveSuccess.set(true);
-      setTimeout(() => this.saveSuccess.set(false), 3000);
+    this.service.putCurrentRound(this.eventId, this.categoryId, { placements: this.buildPlacements() }).subscribe({
+      next: () => this.toast.success('Zapisano pomyślnie'),
+      error: (err: HttpErrorResponse) => this.toast.error(err),
     });
   }
 
@@ -121,12 +123,16 @@ export class TournamentRound implements OnInit {
       .afterClosed()
       .subscribe((confirmed: boolean) => {
         if (!confirmed) return;
-        this.service.postCurrentRound(this.eventId, this.categoryId, { placements: this.buildPlacements() }).subscribe(() => {
-          if (isFinal) {
-            this.stateChange.emit();
-          } else {
-            this.loadData();
-          }
+        this.service.postCurrentRound(this.eventId, this.categoryId, { placements: this.buildPlacements() }).subscribe({
+          next: () => {
+            this.toast.success(isFinal ? 'Turniej zatwierdzony' : 'Runda zatwierdzona');
+            if (isFinal) {
+              this.stateChange.emit();
+            } else {
+              this.loadData();
+            }
+          },
+          error: (err: HttpErrorResponse) => this.toast.error(err),
         });
       });
   }

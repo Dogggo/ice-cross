@@ -12,8 +12,10 @@ import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { HttpErrorResponse } from '@angular/common/http';
 import { EventsService } from '../../services/events.service';
 import { StartingListService } from '../../services/starting-list.service';
+import { ToastService } from '../../services/toast.service';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
 import type { GetEventDetailsResponse } from '../../contracts/events';
 import type { CreateStartingListCategoryRequestBody, GetStartingListResponse } from '../../contracts/starting-list';
@@ -52,6 +54,7 @@ export class StartingList {
   private readonly fb = inject(FormBuilder);
   private readonly dialog = inject(MatDialog);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly toast = inject(ToastService);
 
   readonly eventId = this.route.snapshot.paramMap.get('id') ?? '';
   readonly eventName = signal('');
@@ -61,7 +64,6 @@ export class StartingList {
   readonly forms: Record<string, FormGroup> = {};
   readonly lockedCategories: Record<string, boolean> = {};
   readonly validationErrors: Record<string, string> = {};
-  readonly saveSuccess: Record<string, boolean> = {};
 
   readonly csvTooltip = [
     'Plik musi być w formacie CSV. Przykład formatowania:',
@@ -81,7 +83,6 @@ export class StartingList {
         if (!this.participants[cat.id]) this.participants[cat.id] = [];
         this.lockedCategories[cat.id] = false;
         this.validationErrors[cat.id] = '';
-        this.saveSuccess[cat.id] = false;
         if (!this.forms[cat.id]) {
           this.forms[cat.id] = this.fb.group({
             name: ['', Validators.required],
@@ -155,10 +156,8 @@ export class StartingList {
       }));
 
     this.startingListService.submitStartingList(this.eventId, categoryId, body).subscribe({
-      next: () => {
-        this.saveSuccess[categoryId] = true;
-        setTimeout(() => { this.saveSuccess[categoryId] = false; }, 3000);
-      },
+      next: () => this.toast.success('Lista zapisana pomyślnie'),
+      error: (err: HttpErrorResponse) => this.toast.error(err),
     });
   }
 
@@ -172,7 +171,9 @@ export class StartingList {
           next: () => {
             this.lockedCategories[categoryId] = true;
             this.cdr.markForCheck();
+            this.toast.success('Lista zatwierdzona');
           },
+          error: (err: HttpErrorResponse) => this.toast.error(err),
         });
       }
     });
