@@ -25,11 +25,17 @@
 							<input matInput formControlName="club" />
 						</mat-form-field>
 
-						<mat-form-field appearance="outline">
-							<mat-label>Data urodzenia</mat-label>
-							<input matInput [matDatepicker]="picker" formControlName="dob" />
-							<mat-datepicker-toggle matIconSuffix [for]="picker" />
-							<mat-datepicker #picker />
+<mat-form-field appearance="outline" class="dob-field">
+						<mat-label>Data urodzenia</mat-label>
+						<input matInput [matDatepicker]="picker" formControlName="dob" placeholder="dd/mm/rrrr" />
+						<mat-datepicker-toggle matIconSuffix [for]="picker" />
+						<mat-datepicker #picker />
+						<mat-hint>
+							<span class="dob-hint">
+								<mat-icon class="dob-hint__icon">event</mat-icon>
+								Wpisz datę w formacie <strong>dd/mm/rrrr</strong>
+							</span>
+						</mat-hint>
 						</mat-form-field>
 
 						<button mat-flat-button type="button" class="inline-add-btn" (click)="addParticipant(category.id)">

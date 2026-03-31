@@ -8,7 +8,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTableModule } from '@angular/material/table';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { provideNativeDateAdapter } from '@angular/material/core';
+import { DateAdapter, MAT_DATE_FORMATS } from '@angular/material/core';
+import { DdMmYyyyDateAdapter, DD_MM_YYYY_DATE_FORMATS } from './dd-mm-yyyy-date-adapter';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -43,7 +44,10 @@ export interface Participant {
     MatIconModule,
     MatTooltipModule,
   ],
-  providers: [provideNativeDateAdapter()],
+  providers: [
+    { provide: DateAdapter, useClass: DdMmYyyyDateAdapter },
+    { provide: MAT_DATE_FORMATS, useValue: DD_MM_YYYY_DATE_FORMATS },
+  ],
   templateUrl: './starting-list.html',
   styleUrl: './starting-list.scss',
 })
@@ -137,7 +141,10 @@ export class StartingList {
     const form = this.forms[categoryId];
     if (!form || form.invalid) return;
     const val = form.getRawValue();
-    const dob = val.dob ? new Date(val.dob).toISOString().split('T')[0] : '';
+    const dobDate: Date | null = val.dob ? new Date(val.dob) : null;
+    const dob = dobDate
+      ? `${dobDate.getFullYear()}-${String(dobDate.getMonth() + 1).padStart(2, '0')}-${String(dobDate.getDate()).padStart(2, '0')}`
+      : '';
     this.participants[categoryId] = [
       ...(this.participants[categoryId] ?? []),
       { bibNumber: null, name: val.name, club: val.club, dob, consent: false, present: false },
@@ -168,7 +175,7 @@ export class StartingList {
 
     const body: CreateStartingListCategoryRequestBody = list.map((p) => ({
       name: p.name,
-      bibNumber: p.bibNumber ?? 0,
+      bibNumber: p.bibNumber ?? null,
       sportClub: p.club,
       dob: p.dob,
       consent: p.consent,

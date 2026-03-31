@@ -8,7 +8,7 @@ export type GetStartingListResponse = {
     participants: {
         id: string;
         name: string;
-        bibNumber: number;
+        bibNumber: number | null;
         sportClub: string;
         dob: string; // ISO format
         consent: boolean;
@@ -18,7 +18,7 @@ export type GetStartingListResponse = {
 
 export type CreateStartingListCategoryRequestBody = {
         name: string;
-        bibNumber: number;
+        bibNumber: number | null;
         sportClub: string;
         dob: string; // ISO format
         consent: boolean;
