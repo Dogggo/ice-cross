@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TournamentService } from '../../services/tournament.service';
+import { EventsService } from '../../services/events.service';
 import { TournamentSettings } from './tournament-settings';
 import { TournamentLcq } from './tournament-lcq';
 import { TournamentLcqResults } from './tournament-lcq-results';
@@ -17,6 +18,7 @@ import type { TournamentState } from '../../contracts/tournament';
 export class Tournament implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly service = inject(TournamentService);
+  private readonly eventsService = inject(EventsService);
 
   readonly eventId = this.route.snapshot.paramMap.get('id') ?? '';
   readonly categoryId = this.route.snapshot.paramMap.get('categoryId') ?? '';
@@ -25,6 +27,8 @@ export class Tournament implements OnInit {
   readonly hasLcqRound = signal(false);
   readonly viewingState = signal<TournamentState | null>(null);
   readonly isLoading = signal(true);
+  readonly eventName = signal('');
+  readonly categoryName = signal('');
 
   readonly displayState = computed(() => this.viewingState() ?? this.state());
 
@@ -41,6 +45,11 @@ export class Tournament implements OnInit {
 
   ngOnInit(): void {
     this.loadState();
+    this.eventsService.getEventById(this.eventId).subscribe((event) => {
+      this.eventName.set(event.name);
+      const cat = event.categories.find((c) => c.id === this.categoryId);
+      this.categoryName.set(cat?.name ?? '');
+    });
   }
 
   loadState(): void {

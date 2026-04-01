@@ -3,12 +3,13 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { EventsService } from '../../services/events.service';
 import type { GetEventDetailsResponse } from '../../contracts/events';
 
 @Component({
   selector: 'app-events',
-  imports: [MatButtonModule, MatIconModule, RouterLink, DatePipe],
+  imports: [MatButtonModule, MatIconModule, MatTooltipModule, RouterLink, DatePipe],
   templateUrl: './events.html',
   styleUrl: './events.scss',
 })

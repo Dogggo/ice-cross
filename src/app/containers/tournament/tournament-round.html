@@ -1,7 +1,10 @@
 <div class="round-container">
 
   @if (isLoading()) {
-    <div class="loading-state">Trwa ładowanie rundy...</div>
+    <div class="loading-state">
+      <div class="spinner-ring"></div>
+      <span>Trwa ładowanie rundy...</span>
+    </div>
   } @else {
 
     <div class="round-header">
@@ -104,7 +107,7 @@
           <mat-icon>{{ isFinalRound() ? 'emoji_events' : 'arrow_forward' }}</mat-icon>
           {{ isFinalRound() ? 'Zatwierdź turniej' : 'Zatwierdź rundę' }}
         </button>
-        <button mat-stroked-button type="button" (click)="downloadPdf(false)">
+        <button mat-stroked-button type="button" class="pdf-btn" (click)="downloadPdf(false)">
           <mat-icon>picture_as_pdf</mat-icon>
           Pobierz PDF
         </button>
@@ -115,7 +118,7 @@
     @if (isViewingHistory()) {
     <div class="actions-bar">
       <div class="action-buttons">
-        <button mat-stroked-button type="button" (click)="downloadPdf()">
+        <button mat-stroked-button type="button" class="pdf-btn" (click)="downloadPdf()">
           <mat-icon>picture_as_pdf</mat-icon>
           Pobierz PDF
         </button>

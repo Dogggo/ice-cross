@@ -1,7 +1,18 @@
 <div class="tournament-container">
 
+  @if (eventName()) {
+    <div class="tournament-meta">
+      <span class="tournament-meta__event">{{ eventName() }}</span>
+      @if (categoryName()) {
+        <span class="tournament-meta__sep">›</span>
+        <span class="tournament-meta__category">{{ categoryName() }}</span>
+      }
+    </div>
+  }
+
   @if (isLoading()) {
     <div class="loading-wrapper">
+      <div class="spinner-ring"></div>
       <p class="loading-text">Trwa ładowanie turnieju...</p>
     </div>
   } @else {

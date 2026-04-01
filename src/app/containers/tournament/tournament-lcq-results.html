@@ -6,7 +6,10 @@
   </div>
 
   @if (isLoading()) {
-    <div class="loading-state">Trwa ładowanie wyników...</div>
+    <div class="loading-state">
+      <div class="spinner-ring"></div>
+      <span>Trwa ładowanie wyników...</span>
+    </div>
   } @else {
 
     <!-- Normal view -->
@@ -58,7 +61,7 @@
       @if (readonly) {
         <div class="actions-bar">
           <div class="action-buttons">
-            <button mat-stroked-button type="button" (click)="downloadPdf()">
+            <button mat-stroked-button type="button" class="pdf-btn" (click)="downloadPdf()">
               <mat-icon>picture_as_pdf</mat-icon>
               Pobierz PDF
             </button>

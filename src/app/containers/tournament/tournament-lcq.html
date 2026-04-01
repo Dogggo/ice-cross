@@ -1,7 +1,10 @@
 <div class="lcq-container">
 
   @if (isLoading()) {
-    <div class="loading-state">Trwa ładowanie biegów...</div>
+    <div class="loading-state">
+      <div class="spinner-ring"></div>
+      <span>Trwa ładowanie biegów...</span>
+    </div>
   } @else {
 
     @if (groups().length === 0) {
@@ -65,7 +68,7 @@
             <mat-icon>check</mat-icon>
             Zatwierdź LCQ
           </button>
-          <button mat-stroked-button type="button" (click)="downloadPdf(false)">
+          <button mat-stroked-button type="button" class="pdf-btn" (click)="downloadPdf(false)">
             <mat-icon>picture_as_pdf</mat-icon>
             Pobierz PDF
           </button>
@@ -76,7 +79,7 @@
     @if (readonly) {
       <div class="actions-bar">
         <div class="action-buttons">
-          <button mat-stroked-button type="button" (click)="downloadPdf()">
+          <button mat-stroked-button type="button" class="pdf-btn" (click)="downloadPdf()">
             <mat-icon>picture_as_pdf</mat-icon>
             Pobierz PDF
           </button>

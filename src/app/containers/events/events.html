@@ -27,17 +27,22 @@
         <p class="section-desc">Wprowadź czasy i zatwierdź rundy eliminacyjne</p>
         <div class="category-btn-list">
           @for (category of event.categories; track category.id) {
-            <a
-              [disabled]="!category.startingListLocked"
-              mat-stroked-button
-              [routerLink]="['timed-eliminations', category.id]"
-              class="category-btn"
+            <span
+              class="btn-wrapper"
+              [matTooltip]="!category.startingListLocked ? 'Najpierw zatwierdź listę startową' : ''"
             >
-              @if (category.timedElimination?.isConfirmed) {
-                <mat-icon class="confirmed-icon">check_circle</mat-icon>
-              }
-              {{ category.name }}
-            </a>
+              <a
+                [disabled]="!category.startingListLocked"
+                mat-stroked-button
+                [routerLink]="['timed-eliminations', category.id]"
+                class="category-btn"
+              >
+                @if (category.timedElimination?.isConfirmed) {
+                  <mat-icon class="confirmed-icon">check_circle</mat-icon>
+                }
+                {{ category.name }}
+              </a>
+            </span>
           }
         </div>
       </div>
@@ -50,14 +55,19 @@
         <p class="section-desc">Drabinka turniejowa dla każdej kategorii</p>
         <div class="category-btn-list">
           @for (category of event.categories; track category.id) {
-            <a
-              mat-stroked-button
-              [disabled]="!category.timedElimination?.isConfirmed"
-              [routerLink]="['tournament', category.id]"
-              class="category-btn"
+            <span
+              class="btn-wrapper"
+              [matTooltip]="!category.timedElimination?.isConfirmed ? 'Najpierw zatwierdź eliminacje czasowe' : ''"
             >
-              {{ category.name }}
-            </a>
+              <a
+                mat-stroked-button
+                [disabled]="!category.timedElimination?.isConfirmed"
+                [routerLink]="['tournament', category.id]"
+                class="category-btn"
+              >
+                {{ category.name }}
+              </a>
+            </span>
           }
         </div>
       </div>
@@ -65,6 +75,7 @@
     </div>
   } @else {
     <div class="loading-state">
+      <div class="spinner-ring"></div>
       <p>Trwa ładowanie wydarzenia...</p>
     </div>
   }

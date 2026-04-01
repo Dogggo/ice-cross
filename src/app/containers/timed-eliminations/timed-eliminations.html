@@ -1,8 +1,14 @@
 <div class="timed-eliminations-container">
 	<h1>Eliminacje czasowe</h1>
+	@if (eventName()) {
+		<p class="event-subtitle">{{ eventName() }} — {{ categoryName() }}</p>
+	}
 
 	@if (state() === null) {
-		<p>Trwa ładowanie...</p>
+		<div class="loading-state">
+			<div class="spinner-ring"></div>
+			<span>Trwa ładowanie...</span>
+		</div>
 	} @else {
 		<table mat-table [dataSource]="participants()" class="eliminations-table">
 
@@ -81,7 +87,8 @@
 						[disabled]="!allRound1Filled()"
 						(click)="confirmRound1()"
 					>
-						Zatwierdz 1 rundę
+						<mat-icon>check</mat-icon>
+						Zatwierdź 1. rundę
 					</button>
 				}
 
@@ -92,26 +99,32 @@
 						[disabled]="!allRound2Filled()"
 						(click)="confirmRound2()"
 					>
-						Zatwierdz 2 rundę
+						<mat-icon>check</mat-icon>
+						Zatwierdź 2. rundę
 					</button>
 					<button mat-stroked-button type="button" (click)="skipSecondRound()">
-						Pomiń 2 rundę
+						<mat-icon>skip_next</mat-icon>
+						Pomiń 2. rundę
 					</button>
 				}
 
 				@case ('Filled') {
 					@if (!isEditMode()) {
 						<button mat-flat-button type="button" (click)="confirmResults()">
-							Zatwierdz wyniki
+							<mat-icon>check_circle</mat-icon>
+							Zatwierdź wyniki
 						</button>
 						<button mat-stroked-button type="button" (click)="enterEditMode()">
+							<mat-icon>edit</mat-icon>
 							Edytuj
 						</button>
 					} @else {
 						<button mat-flat-button type="button" (click)="confirmEdit()">
-							Zatwierdz edycje
+							<mat-icon>check</mat-icon>
+							Zatwierdź edycję
 						</button>
 						<button mat-stroked-button type="button" (click)="resetElimination()">
+							<mat-icon>restart_alt</mat-icon>
 							Zresetuj
 						</button>
 					}

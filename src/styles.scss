@@ -86,6 +86,43 @@ body {
   margin: 24px 0;
 }
 
+// ── Loading spinner (CSS-only, no extra imports needed) ────────────────────
+@keyframes spin-ring {
+  to { transform: rotate(360deg); }
+}
+
+.spinner-ring {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(61, 90, 254, 0.12);
+  border-top-color: #3d5afe;
+  border-radius: 50%;
+  animation: spin-ring 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+// Shared loading container layout (padding/color defined per component)
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+// Global PDF button style — consistent purple accent across all views
+.pdf-btn {
+  border-color: #7c3aed !important;
+  color: #7c3aed !important;
+
+  mat-icon {
+    color: #7c3aed !important;
+  }
+
+  &:hover:not([disabled]) {
+    background: rgba(124, 58, 237, 0.06) !important;
+  }
+}
+
 // CSV upload tooltip — multiline, monospace content
 .csv-tooltip {
   white-space: pre-line !important;
