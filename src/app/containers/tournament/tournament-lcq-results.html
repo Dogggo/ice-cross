@@ -20,7 +20,9 @@
               <th>Imię i nazwisko</th>
               <th>Wynik LCQ</th>
               <th>Czas: Runda 1</th>
-              <th>Czas: Runda 2</th>
+              @if (!isSecondRoundSkipped()) {
+                <th>Czas: Runda 2</th>
+              }
             </tr>
           </thead>
           <tbody>
@@ -31,7 +33,9 @@
                 <td class="name-cell">{{ row.name }}</td>
                 <td class="placement-cell">{{ row.LCQ_placement }}</td>
                 <td [class.best-time]="isBestTime(row, 'first')">{{ formatTime(row.firstRoundTime) }}</td>
-                <td [class.best-time]="isBestTime(row, 'second')">{{ formatTime(row.secondRoundTime) }}</td>
+                @if (!isSecondRoundSkipped()) {
+                  <td [class.best-time]="isBestTime(row, 'second')">{{ formatTime(row.secondRoundTime) }}</td>
+                }
               </tr>
             }
           </tbody>

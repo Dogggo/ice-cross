@@ -21,14 +21,14 @@
           <button
             class="round-nav__btn"
             [class.round-nav__btn--active]="(!isViewingHistory() && round === currentRound()) || (isViewingHistory() && viewingRound() === round)"
-            [class.round-nav__btn--future]="round < currentRound()"
-            [disabled]="round < currentRound()"
-            (click)="round > currentRound() ? navigateToRound(round) : goToCurrentRound()"
+            [class.round-nav__btn--future]="currentRound() !== 0 && round < currentRound()"
+            [disabled]="currentRound() !== 0 && round < currentRound()"
+            (click)="currentRound() !== 0 && round > currentRound() ? navigateToRound(round) : (currentRound() === 0 ? navigateToRound(round) : goToCurrentRound())"
           >
             {{ roundLabel(round) }}
-            @if (round === currentRound()) {
+            @if (currentRound() !== 0 && round === currentRound()) {
               <mat-icon class="round-nav__icon">play_circle</mat-icon>
-            } @else if (round < currentRound()) {
+            } @else if (currentRound() !== 0 && round < currentRound()) {
               <mat-icon class="round-nav__icon">lock</mat-icon>
             }
           </button>

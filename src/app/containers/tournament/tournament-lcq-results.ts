@@ -42,6 +42,7 @@ export class TournamentLcqResults implements OnInit {
 
   readonly isLoading = signal(true);
   readonly isEditMode = signal(false);
+  readonly isSecondRoundSkipped = signal(false);
   readonly results = signal<LCQResultEntry[]>([]);
   readonly editableResults = signal<LCQResultEntry[]>([]);
 
@@ -59,6 +60,7 @@ export class TournamentLcqResults implements OnInit {
     this.service.getLCQResults(this.eventId, this.categoryId).subscribe((res) => {
       const sorted = [...res.results].sort((a, b) => a.order - b.order);
       this.results.set(sorted);
+      this.isSecondRoundSkipped.set(res.isSecondRoundSkipped);
       this.isLoading.set(false);
     });
   }
@@ -75,6 +77,7 @@ export class TournamentLcqResults implements OnInit {
   }
 
   downloadPdf(): void {
+    const isSkipped = this.isSecondRoundSkipped();
     const medalFor = (order: number): string => {
       if (order === 1) return '🥇';
       if (order === 2) return '🥈';
@@ -87,16 +90,21 @@ export class TournamentLcqResults implements OnInit {
       const b1 = this.isBestTime(row, 'first');
       const b2 = this.isBestTime(row, 'second');
       const podium = row.order <= 3 ? 'podium-row' : '';
+      const r2Cell = isSkipped ? '' : `<td class="${b2 ? 'best-time' : ''}">${this.formatTime(row.secondRoundTime)}</td>`;
       return `<tr class="${podium}">
         <td class="col-place"><span class="medal">${medal}</span>${row.order}</td>
         <td class="col-bib">${row.bibNumber}</td>
         <td class="col-name">${row.name}</td>
         <td class="col-placement">${row.LCQ_placement}</td>
         <td class="${b1 ? 'best-time' : ''}">${this.formatTime(row.firstRoundTime)}</td>
-        <td class="${b2 ? 'best-time' : ''}">${this.formatTime(row.secondRoundTime)}</td>
+        ${r2Cell}
       </tr>`;
     }).join('');
 
+    const r2Header = isSkipped ? '' : '<th>Runda 2</th>';
+    const legend = isSkipped ? '' : `<div class="footer-legend" style="margin-top:12px;font-size:8pt;color:#7a8ea0;">
+      <span style="color:#16a34a;font-weight:700;">★</span> — lepszy czas zawodnika uwzględniany przy rozstawieniu
+    </div>`;
     const body = `<table>
       <thead><tr>
         <th class="col-place">Wynik</th>
@@ -104,13 +112,10 @@ export class TournamentLcqResults implements OnInit {
         <th class="col-name">Imię i nazwisko</th>
         <th class="col-placement">Wynik LCQ</th>
         <th>Runda 1</th>
-        <th>Runda 2</th>
+        ${r2Header}
       </tr></thead>
       <tbody>${rows}</tbody>
-    </table>
-    <div class="footer-legend" style="margin-top:12px;font-size:8pt;color:#7a8ea0;">
-      <span style="color:#16a34a;font-weight:700;">★</span> — lepszy czas zawodnika uwzględniany przy rozstawieniu
-    </div>`;
+    </table>${legend}`;
 
     this.pdf.open(
       { eventName: this.eventName(), categoryName: this.categoryName(), documentTitle: 'Wyniki LCQ', badge: 'Wyniki LCQ' },

@@ -135,6 +135,7 @@ export class TournamentRound implements OnInit {
     this.service.getRound(this.eventId, this.categoryId, round).subscribe((res) => {
       this.viewingRound.set(round);
       this.isViewingHistory.set(true);
+      if (res.roundSize) this.roundSize.set(res.roundSize);
       const sorted = [...res.groups].sort((a, b) => a.groupNumber - b.groupNumber);
       this.groups.set(sorted);
       const map: Record<string, string> = {};
