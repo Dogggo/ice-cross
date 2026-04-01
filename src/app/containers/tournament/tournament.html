@@ -8,8 +8,14 @@
 
     <!-- Progress stepper -->
     <div class="state-progress">
-      @for (step of stateSteps; track step.key) {
-        <div class="step" [class.active]="state() === step.key" [class.done]="isStepDone(step.key)">
+      @for (step of stateSteps(); track step.key) {
+        <div
+          class="step"
+          [class.active]="isStepActive(step.key)"
+          [class.done]="isStepDone(step.key)"
+          [class.clickable]="isStepClickable(step.key)"
+          (click)="isStepClickable(step.key) && navigateToStep($any(step.key))"
+        >
           <div class="step-dot">
             @if (isStepDone(step.key)) {
               <span class="step-check">✓</span>
@@ -23,7 +29,7 @@
     </div>
 
     <div class="state-content">
-      @switch (state()) {
+      @switch (displayState()) {
         @case ('SETTINGS') {
           <app-tournament-settings
             [eventId]="eventId"
@@ -35,6 +41,7 @@
           <app-tournament-lcq
             [eventId]="eventId"
             [categoryId]="categoryId"
+            [readonly]="viewingState() === 'LCQ'"
             (stateChange)="loadState()"
           />
         }
@@ -42,6 +49,7 @@
           <app-tournament-lcq-results
             [eventId]="eventId"
             [categoryId]="categoryId"
+            [readonly]="viewingState() === 'LCQ_RESULTS'"
             (stateChange)="loadState()"
           />
         }
@@ -49,6 +57,7 @@
           <app-tournament-round
             [eventId]="eventId"
             [categoryId]="categoryId"
+            [historyRound]="viewingState() === 'TOURNAMENT' ? 4 : undefined"
             (stateChange)="loadState()"
           />
         }

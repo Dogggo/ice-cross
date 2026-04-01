@@ -6,6 +6,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
 import { ToastService } from '../../services/toast.service';
 import { TournamentService } from '../../services/tournament.service';
+import { EventsService } from '../../services/events.service';
+import { PdfService } from '../../services/pdf.service';
 import type { TournamentGroup, PlacementEntry, RacePlacement } from '../../contracts/tournament';
 
 interface ProcessedRow {
@@ -28,11 +30,17 @@ interface ProcessedGroup {
 export class TournamentRound implements OnInit {
   @Input() eventId!: string;
   @Input() categoryId!: string;
+  @Input() historyRound?: number;
   @Output() stateChange = new EventEmitter<void>();
 
   private readonly service = inject(TournamentService);
   private readonly dialog = inject(MatDialog);
   private readonly toast = inject(ToastService);
+  private readonly eventsService = inject(EventsService);
+  private readonly pdf = inject(PdfService);
+
+  readonly eventName = signal('');
+  readonly categoryName = signal('');
 
   readonly isLoading = signal(true);
   readonly currentRound = signal(0);
@@ -92,7 +100,16 @@ export class TournamentRound implements OnInit {
   readonly isAllValid = computed(() => this.groupValidities().every(Boolean));
 
   ngOnInit(): void {
-    this.loadData();
+    this.eventsService.getEventById(this.eventId).subscribe((event) => {
+      this.eventName.set(event.name);
+      const cat = event.categories.find((c) => c.id === this.categoryId);
+      this.categoryName.set(cat?.name ?? '');
+    });
+    if (this.historyRound != null) {
+      this.navigateToRound(this.historyRound);
+    } else {
+      this.loadData();
+    }
   }
 
   loadData(): void {
@@ -102,9 +119,10 @@ export class TournamentRound implements OnInit {
       this.currentRound.set(res.currentRound);
       this.roundSize.set(res.roundSize);
       this.viewingRound.set(res.currentRound);
-      this.groups.set(res.groups);
+      const sorted = [...res.groups].sort((a, b) => a.groupNumber - b.groupNumber);
+      this.groups.set(sorted);
       const map: Record<string, string> = {};
-      res.groups.forEach((g) => g.participants.forEach((p) => {
+      sorted.forEach((g) => g.participants.forEach((p) => {
         map[p.id] = p.placement ?? '';
       }));
       this.placements.set(map);
@@ -117,14 +135,57 @@ export class TournamentRound implements OnInit {
     this.service.getRound(this.eventId, this.categoryId, round).subscribe((res) => {
       this.viewingRound.set(round);
       this.isViewingHistory.set(true);
-      this.groups.set(res.groups);
+      const sorted = [...res.groups].sort((a, b) => a.groupNumber - b.groupNumber);
+      this.groups.set(sorted);
       const map: Record<string, string> = {};
-      res.groups.forEach((g) => g.participants.forEach((p) => {
+      sorted.forEach((g) => g.participants.forEach((p) => {
         map[p.id] = p.placement ?? '';
       }));
       this.placements.set(map);
       this.isLoading.set(false);
     });
+  }
+
+  downloadPdf(showPlacements = true): void {
+    const roundLabel = this.roundLabel(this.viewingRound());
+    const p = this.placements();
+
+    const heatsHtml = this.groups().map((g, gi) => {
+      const tableRows = this.processedGroups()[gi].rows
+        .filter((row) => row.id !== null)
+        .map((row) => {
+          const placement = p[row.id!] ?? '';
+          const isDns = placement === 'DNS';
+          const placementCell = showPlacements ? `<td class="col-placement">${placement || '—'}</td>` : '';
+          return `<tr class="${isDns ? 'dns-row' : ''}">
+            ${placementCell}
+            <td class="col-bib">${row.bibNumber ?? ''}</td>
+            <td class="col-name">${row.name}</td>
+          </tr>`;
+        }).join('');
+      const placementHeader = showPlacements ? '<th class="col-placement">Wynik</th>' : '';
+      return `<div class="heat-block">
+        <div class="heat-label">Bieg ${gi + 1}</div>
+        <table>
+          <thead><tr>
+            ${placementHeader}
+            <th class="col-bib">Nr</th>
+            <th class="col-name">Imię i nazwisko</th>
+          </tr></thead>
+          <tbody>${tableRows}</tbody>
+        </table>
+      </div>`;
+    }).join('');
+
+    this.pdf.open(
+      {
+        eventName: this.eventName(),
+        categoryName: this.categoryName(),
+        documentTitle: roundLabel,
+        badge: `Turniej — ${roundLabel}`,
+      },
+      heatsHtml,
+    );
   }
 
   goToCurrentRound(): void {

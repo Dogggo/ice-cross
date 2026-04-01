@@ -7,6 +7,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
 import { ToastService } from '../../services/toast.service';
 import { TournamentService } from '../../services/tournament.service';
+import { EventsService } from '../../services/events.service';
+import { PdfService } from '../../services/pdf.service';
 import type { LCQResultEntry } from '../../contracts/tournament';
 
 function msToTimeString(ms: number | null): string {
@@ -26,11 +28,17 @@ function msToTimeString(ms: number | null): string {
 export class TournamentLcqResults implements OnInit {
   @Input() eventId!: string;
   @Input() categoryId!: string;
+  @Input() readonly = false;
   @Output() stateChange = new EventEmitter<void>();
 
   private readonly service = inject(TournamentService);
   private readonly dialog = inject(MatDialog);
   private readonly toast = inject(ToastService);
+  private readonly eventsService = inject(EventsService);
+  private readonly pdf = inject(PdfService);
+
+  readonly eventName = signal('');
+  readonly categoryName = signal('');
 
   readonly isLoading = signal(true);
   readonly isEditMode = signal(false);
@@ -39,6 +47,11 @@ export class TournamentLcqResults implements OnInit {
 
   ngOnInit(): void {
     this.loadData();
+    this.eventsService.getEventById(this.eventId).subscribe((event) => {
+      this.eventName.set(event.name);
+      const cat = event.categories.find((c) => c.id === this.categoryId);
+      this.categoryName.set(cat?.name ?? '');
+    });
   }
 
   loadData(): void {
@@ -59,6 +72,50 @@ export class TournamentLcqResults implements OnInit {
     return field === 'first'
       ? entry.firstRoundTime <= entry.secondRoundTime
       : entry.secondRoundTime < entry.firstRoundTime;
+  }
+
+  downloadPdf(): void {
+    const medalFor = (order: number): string => {
+      if (order === 1) return '🥇';
+      if (order === 2) return '🥈';
+      if (order === 3) return '🥉';
+      return '';
+    };
+
+    const rows = this.results().map((row) => {
+      const medal = medalFor(row.order);
+      const b1 = this.isBestTime(row, 'first');
+      const b2 = this.isBestTime(row, 'second');
+      const podium = row.order <= 3 ? 'podium-row' : '';
+      return `<tr class="${podium}">
+        <td class="col-place"><span class="medal">${medal}</span>${row.order}</td>
+        <td class="col-bib">${row.bibNumber}</td>
+        <td class="col-name">${row.name}</td>
+        <td class="col-placement">${row.LCQ_placement}</td>
+        <td class="${b1 ? 'best-time' : ''}">${this.formatTime(row.firstRoundTime)}</td>
+        <td class="${b2 ? 'best-time' : ''}">${this.formatTime(row.secondRoundTime)}</td>
+      </tr>`;
+    }).join('');
+
+    const body = `<table>
+      <thead><tr>
+        <th class="col-place">Wynik</th>
+        <th class="col-bib">Nr</th>
+        <th class="col-name">Imię i nazwisko</th>
+        <th class="col-placement">Wynik LCQ</th>
+        <th>Runda 1</th>
+        <th>Runda 2</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div class="footer-legend" style="margin-top:12px;font-size:8pt;color:#7a8ea0;">
+      <span style="color:#16a34a;font-weight:700;">★</span> — lepszy czas zawodnika uwzględniany przy rozstawieniu
+    </div>`;
+
+    this.pdf.open(
+      { eventName: this.eventName(), categoryName: this.categoryName(), documentTitle: 'Wyniki LCQ', badge: 'Wyniki LCQ' },
+      body,
+    );
   }
 
   startEdit(): void {

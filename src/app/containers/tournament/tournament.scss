@@ -97,6 +97,14 @@
     }
   }
 
+  &.clickable {
+    cursor: pointer;
+
+    &:hover .step-dot {
+      outline: 2px solid rgba(61, 90, 254, 0.3);
+    }
+  }
+
   &.done {
     .step-dot {
       background: rgba(16, 185, 129, 0.15);
@@ -108,8 +116,4 @@
 }
 
 // ── Content area ──────────────────────────────────────────────────────────────
-
-.state-content {
-  // sub-components handle their own layout
-}
 

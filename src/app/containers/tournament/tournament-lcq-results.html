@@ -38,20 +38,31 @@
         </table>
       </div>
 
-      <div class="actions-bar">
-        <button mat-flat-button type="button" (click)="proceedToTournament()">
-          <mat-icon>arrow_forward</mat-icon>
-          Przejdź do turnieju
-        </button>
-        <button mat-stroked-button type="button" (click)="startEdit()">
-          <mat-icon>edit</mat-icon>
-          Edytuj
-        </button>
-      </div>
-    }
+      @if (!readonly) {
+        <div class="actions-bar">
+          <button mat-flat-button type="button" (click)="proceedToTournament()">
+            <mat-icon>arrow_forward</mat-icon>
+            Przejdź do turnieju
+          </button>
+          <button mat-stroked-button type="button" (click)="startEdit()">
+            <mat-icon>edit</mat-icon>
+            Edytuj
+          </button>
+        </div>
+      }
 
-    <!-- Edit mode with drag & drop -->
-    @if (isEditMode()) {
+      @if (readonly) {
+        <div class="actions-bar">
+          <div class="action-buttons">
+            <button mat-stroked-button type="button" (click)="downloadPdf()">
+              <mat-icon>picture_as_pdf</mat-icon>
+              Pobierz PDF
+            </button>
+          </div>
+        </div>
+      }
+    }
+    @if (isEditMode() && !readonly) {
       <div class="edit-hint">
         <mat-icon>drag_indicator</mat-icon>
         Przeciągnij wiersze, aby zmienić kolejność zawodników

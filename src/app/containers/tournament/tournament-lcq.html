@@ -35,6 +35,7 @@
                       @if (row.id) {
                         <select
                           class="placement-select"
+                          [disabled]="readonly"
                           (change)="updatePlacement(row.id, $event)"
                         >
                           <option value="" [selected]="getPlacement(row.id) === ''">—</option>
@@ -53,18 +54,35 @@
       </div>
     }
 
-    <div class="actions-bar">
-      <div class="action-buttons">
-        <button mat-stroked-button type="button" (click)="save()">
-          <mat-icon>save</mat-icon>
-          Zapisz LCQ
-        </button>
-        <button mat-flat-button type="button" [disabled]="!isAllValid()" (click)="confirm()">
-          <mat-icon>check</mat-icon>
-          Zatwierdź LCQ
-        </button>
+    @if (!readonly) {
+      <div class="actions-bar">
+        <div class="action-buttons">
+          <button mat-stroked-button type="button" (click)="save()">
+            <mat-icon>save</mat-icon>
+            Zapisz LCQ
+          </button>
+          <button mat-flat-button type="button" [disabled]="!isAllValid()" (click)="confirm()">
+            <mat-icon>check</mat-icon>
+            Zatwierdź LCQ
+          </button>
+          <button mat-stroked-button type="button" (click)="downloadPdf(false)">
+            <mat-icon>picture_as_pdf</mat-icon>
+            Pobierz PDF
+          </button>
+        </div>
       </div>
-    </div>
+    }
+
+    @if (readonly) {
+      <div class="actions-bar">
+        <div class="action-buttons">
+          <button mat-stroked-button type="button" (click)="downloadPdf()">
+            <mat-icon>picture_as_pdf</mat-icon>
+            Pobierz PDF
+          </button>
+        </div>
+      </div>
+    }
 
   }
 </div>

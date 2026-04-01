@@ -2,6 +2,7 @@ export type TournamentState = 'SETTINGS' | 'LCQ' | 'LCQ_RESULTS' | 'TOURNAMENT' 
 
 export interface GetTournamentStateResponse {
   state: TournamentState;
+  hasLcqRound: boolean;
 }
 
 export type RacePlacement = '1' | '2' | '3' | '4' | 'DNS';
@@ -16,6 +17,7 @@ export interface LCQParticipant {
 }
 
 export interface LCQGroup {
+  groupNumber: number;
   participants: LCQParticipant[];
 }
 
@@ -49,6 +51,7 @@ export interface LCQResultEntry {
 }
 
 export interface GetLCQResultsResponse {
+  isSecondRoundSkipped: boolean;
   results: LCQResultEntry[];
 }
 
@@ -82,6 +85,7 @@ export interface TournamentParticipant {
 }
 
 export interface TournamentGroup {
+  groupNumber: number;
   participants: TournamentParticipant[];
 }
 

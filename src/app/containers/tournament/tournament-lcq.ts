@@ -6,6 +6,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
 import { ToastService } from '../../services/toast.service';
 import { TournamentService } from '../../services/tournament.service';
+import { EventsService } from '../../services/events.service';
+import { PdfService } from '../../services/pdf.service';
 import type { LCQGroup, PlacementEntry, RacePlacement } from '../../contracts/tournament';
 
 interface ProcessedRow {
@@ -29,11 +31,17 @@ interface ProcessedGroup {
 export class TournamentLcq implements OnInit {
   @Input() eventId!: string;
   @Input() categoryId!: string;
+  @Input() readonly = false;
   @Output() stateChange = new EventEmitter<void>();
 
   private readonly service = inject(TournamentService);
   private readonly dialog = inject(MatDialog);
   private readonly toast = inject(ToastService);
+  private readonly eventsService = inject(EventsService);
+  private readonly pdf = inject(PdfService);
+
+  readonly eventName = signal('');
+  readonly categoryName = signal('');
 
   readonly isLoading = signal(true);
   readonly groups = signal<LCQGroup[]>([]);
@@ -66,14 +74,20 @@ export class TournamentLcq implements OnInit {
 
   ngOnInit(): void {
     this.loadData();
+    this.eventsService.getEventById(this.eventId).subscribe((event) => {
+      this.eventName.set(event.name);
+      const cat = event.categories.find((c) => c.id === this.categoryId);
+      this.categoryName.set(cat?.name ?? '');
+    });
   }
 
   loadData(): void {
     this.isLoading.set(true);
     this.service.getLCQ(this.eventId, this.categoryId).subscribe((res) => {
-      this.groups.set(res.groups);
+      const sorted = [...res.groups].sort((a, b) => a.groupNumber - b.groupNumber);
+      this.groups.set(sorted);
       const map: Record<string, string> = {};
-      res.groups.forEach((g) => g.participants.forEach((p) => {
+      sorted.forEach((g) => g.participants.forEach((p) => {
         map[p.id] = p.placement ?? '';
       }));
       this.placements.set(map);
@@ -109,6 +123,31 @@ export class TournamentLcq implements OnInit {
       next: () => this.toast.success('Zapisano pomyślnie'),
       error: (err: HttpErrorResponse) => this.toast.error(err),
     });
+  }
+
+  downloadPdf(showPlacements = true): void {
+    const rows = this.processedGroups().map((group, gi) => {
+      const headerRow = `<div class="heat-block"><div class="heat-label">Bieg ${gi + 1}</div>`;
+      const tableRows = group.rows.map((row) => {
+        const placement = row.id ? (this.placements()[row.id] ?? '') : '';
+        const isDns = placement === 'DNS';
+        const placementCell = showPlacements ? `<td class="col-place">${placement || (row.id ? '—' : '')}</td>` : '';
+        return `<tr class="${!row.id ? 'dns-row' : ''} ${isDns ? 'dns-row' : ''}">
+          ${placementCell}
+          <td class="col-bib">${row.bibNumber ?? ''}</td>
+          <td class="col-name">${row.name}</td>
+        </tr>`;
+      }).join('');
+      const placementHeader = showPlacements ? '<th class="col-place">Wynik</th>' : '';
+      return `${headerRow}<table>
+        <thead><tr>${placementHeader}<th class="col-bib">Nr</th><th class="col-name">Imię i nazwisko</th></tr></thead>
+        <tbody>${tableRows}</tbody></table></div>`;
+    }).join('');
+
+    this.pdf.open(
+      { eventName: this.eventName(), categoryName: this.categoryName(), documentTitle: 'LCQ', badge: 'LCQ' },
+      rows,
+    );
   }
 
   confirm(): void {

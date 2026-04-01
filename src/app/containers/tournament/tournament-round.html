@@ -104,6 +104,21 @@
           <mat-icon>{{ isFinalRound() ? 'emoji_events' : 'arrow_forward' }}</mat-icon>
           {{ isFinalRound() ? 'Zatwierdź turniej' : 'Zatwierdź rundę' }}
         </button>
+        <button mat-stroked-button type="button" (click)="downloadPdf(false)">
+          <mat-icon>picture_as_pdf</mat-icon>
+          Pobierz PDF
+        </button>
+      </div>
+    </div>
+    }
+
+    @if (isViewingHistory()) {
+    <div class="actions-bar">
+      <div class="action-buttons">
+        <button mat-stroked-button type="button" (click)="downloadPdf()">
+          <mat-icon>picture_as_pdf</mat-icon>
+          Pobierz PDF
+        </button>
       </div>
     </div>
     }
