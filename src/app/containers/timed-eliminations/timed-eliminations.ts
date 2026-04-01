@@ -20,7 +20,10 @@ import { TimedEliminationState } from '../../contracts/timed-elimination';
 function parseTime(value: string): number | null {
   const match = value.trim().match(/^(\d{1,2}):(\d{2}):(\d{3})$/);
   if (!match) return null;
-  return parseInt(match[1], 10) * 60000 + parseInt(match[2], 10) * 1000 + parseInt(match[3], 10);
+  const min = parseInt(match[1], 10);
+  const sec = parseInt(match[2], 10);
+  if (min > 59 || sec > 59) return null;
+  return min * 60000 + sec * 1000 + parseInt(match[3], 10);
 }
 
 function msToTimeString(ms: number): string {
@@ -168,6 +171,16 @@ export class TimedEliminations {
 
   getControl(id: string, field: 'round1' | 'round2'): FormControl {
     return (this.rowFormMap.get(id)?.get(field) ?? new FormControl()) as FormControl;
+  }
+
+  isTimeInvalid(id: string, field: 'round1' | 'round2'): boolean {
+    const val = (this.rowFormMap.get(id)?.get(field)?.value ?? '').trim();
+    if (val === '') return false;
+    const match = val.match(/^(\d{1,2}):(\d{2}):(\d{3})$/);
+    if (!match) return true;
+    const min = parseInt(match[1], 10);
+    const sec = parseInt(match[2], 10);
+    return min > 59 || sec > 59;
   }
 
   getResignedControl(id: string): FormControl<boolean> {

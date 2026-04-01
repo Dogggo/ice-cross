@@ -36,10 +36,34 @@ export class TournamentRound implements OnInit {
 
   readonly isLoading = signal(true);
   readonly currentRound = signal(0);
+  readonly roundSize = signal(0);
+  readonly viewingRound = signal(0);
+  readonly isViewingHistory = signal(false);
   readonly groups = signal<TournamentGroup[]>([]);
   readonly placements = signal<Record<string, string>>({});
 
   readonly isFinalRound = computed(() => this.currentRound() === 4);
+
+  readonly availableRounds = computed((): number[] => {
+    const size = this.roundSize();
+    if (!size || size < 4) return [];
+    const rounds: number[] = [];
+    for (let r = size; r >= 4; r = r / 2) {
+      rounds.push(r);
+    }
+    return rounds;
+  });
+
+  roundLabel(round: number): string {
+    switch (round) {
+      case 4: return 'Finał';
+      case 8: return 'Półfinał';
+      case 16: return 'Ćwierćfinał';
+      case 32: return '1/16 finału';
+      case 64: return '1/32 finału';
+      default: return `Runda ${round}`;
+    }
+  }
 
   readonly processedGroups = computed((): ProcessedGroup[] =>
     this.groups().map((g) => {
@@ -73,8 +97,11 @@ export class TournamentRound implements OnInit {
 
   loadData(): void {
     this.isLoading.set(true);
+    this.isViewingHistory.set(false);
     this.service.getCurrentRound(this.eventId, this.categoryId).subscribe((res) => {
       this.currentRound.set(res.currentRound);
+      this.roundSize.set(res.roundSize);
+      this.viewingRound.set(res.currentRound);
       this.groups.set(res.groups);
       const map: Record<string, string> = {};
       res.groups.forEach((g) => g.participants.forEach((p) => {
@@ -83,6 +110,25 @@ export class TournamentRound implements OnInit {
       this.placements.set(map);
       this.isLoading.set(false);
     });
+  }
+
+  navigateToRound(round: number): void {
+    this.isLoading.set(true);
+    this.service.getRound(this.eventId, this.categoryId, round).subscribe((res) => {
+      this.viewingRound.set(round);
+      this.isViewingHistory.set(true);
+      this.groups.set(res.groups);
+      const map: Record<string, string> = {};
+      res.groups.forEach((g) => g.participants.forEach((p) => {
+        map[p.id] = p.placement ?? '';
+      }));
+      this.placements.set(map);
+      this.isLoading.set(false);
+    });
+  }
+
+  goToCurrentRound(): void {
+    this.loadData();
   }
 
   getPlacement(id: string): string {

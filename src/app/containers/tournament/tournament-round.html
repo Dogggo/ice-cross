@@ -5,11 +5,43 @@
   } @else {
 
     <div class="round-header">
-      <h2>Runda {{ currentRound() }}</h2>
-      <span class="round-badge" [class.final-badge]="isFinalRound()">
-        {{ isFinalRound() ? 'Finał' : 'Eliminacje' }}
+      <h2>{{ roundLabel(viewingRound()) }}</h2>
+      <span class="round-badge" [class.final-badge]="isFinalRound() && !isViewingHistory()">
+        @if (isViewingHistory()) {
+          Historia
+        } @else {
+          {{ isFinalRound() ? 'Finał' : 'Eliminacje' }}
+        }
       </span>
     </div>
+
+    @if (availableRounds().length > 0) {
+      <div class="round-nav">
+        @for (round of availableRounds(); track round) {
+          <button
+            class="round-nav__btn"
+            [class.round-nav__btn--active]="(!isViewingHistory() && round === currentRound()) || (isViewingHistory() && viewingRound() === round)"
+            [class.round-nav__btn--future]="round < currentRound()"
+            [disabled]="round < currentRound()"
+            (click)="round > currentRound() ? navigateToRound(round) : goToCurrentRound()"
+          >
+            {{ roundLabel(round) }}
+            @if (round === currentRound()) {
+              <mat-icon class="round-nav__icon">play_circle</mat-icon>
+            } @else if (round < currentRound()) {
+              <mat-icon class="round-nav__icon">lock</mat-icon>
+            }
+          </button>
+        }
+      </div>
+    }
+
+    @if (isViewingHistory()) {
+      <div class="history-banner">
+        <mat-icon>history</mat-icon>
+        <span>Przeglądasz wyniki rundy {{ roundLabel(viewingRound()) }} — tryb tylko do odczytu</span>
+      </div>
+    }
 
     @if (groups().length === 0) {
       <p class="empty-state">Brak biegów do wyświetlenia.</p>
@@ -42,6 +74,7 @@
                       @if (row.id) {
                         <select
                           class="placement-select"
+                          [disabled]="isViewingHistory()"
                           (change)="updatePlacement(row.id, $event)"
                         >
                           <option value="" [selected]="getPlacement(row.id) === ''">—</option>
@@ -60,6 +93,7 @@
       </div>
     }
 
+    @if (!isViewingHistory()) {
     <div class="actions-bar">
       <div class="action-buttons">
         <button mat-stroked-button type="button" (click)="save()">
@@ -72,6 +106,7 @@
         </button>
       </div>
     </div>
+    }
 
   }
 </div>

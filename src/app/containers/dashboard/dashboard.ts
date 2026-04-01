@@ -81,9 +81,11 @@ export class Dashboard {
       .map((categoryName) => categoryName.trim())
       .filter((categoryName) => categoryName.length > 0);
 
+    const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
     this.eventsService.createEvent({
       name: name.trim(),
-      date: date.toISOString().split('T')[0],
+      date: dateStr,
       categories: normalizedCategories,
     }).subscribe({
       next: () => {

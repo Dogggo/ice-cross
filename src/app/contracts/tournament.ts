@@ -86,7 +86,7 @@ export interface TournamentGroup {
 }
 
 export interface GetTournamentCurrentRoundResponse {
-  size: number;
+  roundSize: number;
   currentRound: number; // 64, 32, 16, 8, 4, 0 → 0 = finished
   groups: TournamentGroup[];
 }

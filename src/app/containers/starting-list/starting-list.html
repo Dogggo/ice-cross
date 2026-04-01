@@ -74,11 +74,12 @@
 							<th mat-header-cell *matHeaderCellDef>Nr start.</th>
 							<td mat-cell *matCellDef="let p; let i = index">
 								<input
-									type="number"
+									type="text"
 									class="bib-input"
+									[class.bib-input--invalid]="isBibInvalid(p.bibNumber) || isBibDuplicate(category.id, p.bibNumber)"
 									[value]="p.bibNumber ?? ''"
 									[disabled]="isCategoryLocked(category.id)"
-									(change)="updateBibNumber(category.id, i, $any($event.target).value)"
+									(input)="updateBibNumber(category.id, i, $any($event.target).value)"
 								/>
 							</td>
 						</ng-container>
@@ -146,6 +147,12 @@
 
 				@if (!isCategoryLocked(category.id)) {
 					<div class="category-actions">
+						@if (duplicateErrors[category.id]) {
+							<p class="validation-error duplicate-error">
+								<mat-icon class="msg-icon">people</mat-icon>
+								{{ duplicateErrors[category.id] }}
+							</p>
+						}
 						@if (validationErrors[category.id]) {
 							<p class="validation-error">
 								<mat-icon class="msg-icon">error_outline</mat-icon>
@@ -153,13 +160,15 @@
 							</p>
 						}
 						<div class="category-action-buttons">
-							<button mat-flat-button type="button" (click)="submitStartingList(category.id)">
+							<button mat-flat-button type="button"
+								[disabled]="hasDuplicates(category.id)"
+								(click)="submitStartingList(category.id)">
 								<mat-icon>save</mat-icon>
 								Zapisz listę
 							</button>
 						<div class="lock-btn-group">
 							<button mat-stroked-button type="button"
-								[disabled]="!canLockCategory(category.id)"
+								[disabled]="!canLockCategory(category.id) || hasDuplicates(category.id)"
 								(click)="lockStartingList(category.id)">
 								<mat-icon>lock</mat-icon>
 								Zatwierdź listę

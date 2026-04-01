@@ -68,6 +68,7 @@ export class StartingList {
   readonly forms: Record<string, FormGroup> = {};
   readonly lockedCategories: Record<string, boolean> = {};
   readonly validationErrors: Record<string, string> = {};
+  readonly duplicateErrors: Record<string, string> = {};
   /** Count of participants with both present+consent flag, from the last server response */
   readonly savedEligibleCount: Record<string, number> = {};
 
@@ -117,6 +118,7 @@ export class StartingList {
         present: p.present,
       }));
       this.savedEligibleCount[entry.categoryId] = entry.participants.filter((p) => p.present && p.consent).length;
+      this.checkDuplicates(entry.categoryId);
     });
     this.cdr.markForCheck();
   }
@@ -149,12 +151,70 @@ export class StartingList {
       ...(this.participants[categoryId] ?? []),
       { bibNumber: null, name: val.name, club: val.club, dob, consent: false, present: false },
     ];
+    this.checkDuplicates(categoryId);
     form.reset();
   }
 
   updateBibNumber(categoryId: string, index: number, value: string): void {
-    const num = parseInt(value, 10);
-    this.participants[categoryId][index].bibNumber = isNaN(num) ? null : num;
+    const trimmed = value.trim();
+    if (trimmed === '') {
+      this.participants[categoryId][index].bibNumber = null;
+      this.checkDuplicates(categoryId);
+      return;
+    }
+    const num = parseInt(trimmed, 10);
+    this.participants[categoryId][index].bibNumber = (/^\d+$/.test(trimmed) && num >= 0) ? num : trimmed as any;
+    this.checkDuplicates(categoryId);
+  }
+
+  isBibInvalid(value: unknown): boolean {
+    if (value === null || value === undefined) return false;
+    if (typeof value === 'number') return value < 0;
+    if (typeof value === 'string') return !/^\d+$/.test(value);
+    return true;
+  }
+
+  checkDuplicates(categoryId: string): void {
+    const list = this.participants[categoryId] ?? [];
+    const errors: string[] = [];
+
+    // Check duplicate name + DOB
+    const seenNames = new Map<string, number>();
+    for (const p of list) {
+      if (!p.name.trim() || !p.dob) continue;
+      const key = `${p.name.trim().toLowerCase()}|${p.dob}`;
+      seenNames.set(key, (seenNames.get(key) ?? 0) + 1);
+    }
+    for (const [, count] of seenNames) {
+      if (count > 1) {
+        errors.push('Wykryto uczestników z tym samym imieniem i datą urodzenia.');
+        break;
+      }
+    }
+
+    // Check duplicate bib numbers
+    const seenBibs = new Map<number, number>();
+    for (const p of list) {
+      if (p.bibNumber === null || p.bibNumber === undefined || typeof p.bibNumber !== 'number') continue;
+      seenBibs.set(p.bibNumber, (seenBibs.get(p.bibNumber) ?? 0) + 1);
+    }
+    for (const [bib, count] of seenBibs) {
+      if (count > 1) {
+        errors.push(`Nr startowy ${bib} jest przypisany do więcej niż jednego uczestnika.`);
+      }
+    }
+
+    this.duplicateErrors[categoryId] = errors.length > 0 ? errors.join(' ') : '';
+  }
+
+  hasDuplicates(categoryId: string): boolean {
+    return !!this.duplicateErrors[categoryId];
+  }
+
+  isBibDuplicate(categoryId: string, bibNumber: unknown): boolean {
+    if (bibNumber === null || bibNumber === undefined || typeof bibNumber !== 'number') return false;
+    const list = this.participants[categoryId] ?? [];
+    return list.filter((p) => p.bibNumber === bibNumber).length > 1;
   }
 
   updateParticipant(categoryId: string, index: number, updates: Partial<Participant>): void {
@@ -163,12 +223,22 @@ export class StartingList {
 
   removeParticipant(categoryId: string, index: number): void {
     this.participants[categoryId] = this.participants[categoryId].filter((_, i) => i !== index);
+    this.checkDuplicates(categoryId);
   }
 
   submitStartingList(categoryId: string): void {
     const list = this.participants[categoryId] ?? [];
     if (list.length === 0) {
       this.validationErrors[categoryId] = 'Lista nie może być pusta.';
+      return;
+    }
+    if (list.some((p) => this.isBibInvalid(p.bibNumber))) {
+      this.validationErrors[categoryId] = 'Numery startowe mogą zawierać wyłącznie cyfry (0 lub więcej).';
+      return;
+    }
+    this.checkDuplicates(categoryId);
+    if (this.hasDuplicates(categoryId)) {
+      this.validationErrors[categoryId] = '';
       return;
     }
     this.validationErrors[categoryId] = '';
@@ -235,6 +305,7 @@ export class StartingList {
         ...(this.participants[categoryId] ?? []),
         ...newParticipants,
       ];
+      this.checkDuplicates(categoryId);
       input.value = '';
       this.cdr.markForCheck();
     };

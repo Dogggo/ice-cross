@@ -28,10 +28,14 @@
 			<ng-container matColumnDef="round1">
 				<th mat-header-cell *matHeaderCellDef>Czas: Runda 1</th>
 				<td mat-cell *matCellDef="let row" [class.best-time-cell]="isBestTime(row.id, 'round1')">
-					<mat-form-field appearance="outline" class="time-field">
+					<mat-form-field appearance="outline" class="time-field" [class.time-field--invalid]="isTimeInvalid(row.id, 'round1')">
 						<input matInput [formControl]="getControl(row.id, 'round1')" placeholder="00:00:000"
 							(focus)="setFocusedRow(row.id)" (blur)="clearFocusedRow()" />
-						<mat-hint>mm:ss:ms</mat-hint>
+						@if (isTimeInvalid(row.id, 'round1')) {
+							<mat-error>Format: mm:ss:ms (np. 02:34:567)</mat-error>
+						} @else {
+							<mat-hint>mm:ss:ms</mat-hint>
+						}
 					</mat-form-field>
 				</td>
 			</ng-container>
@@ -40,10 +44,14 @@
 			<ng-container matColumnDef="round2">
 				<th mat-header-cell *matHeaderCellDef>Czas: Runda 2</th>
 				<td mat-cell *matCellDef="let row" [class.best-time-cell]="isBestTime(row.id, 'round2')">
-					<mat-form-field appearance="outline" class="time-field">
+					<mat-form-field appearance="outline" class="time-field" [class.time-field--invalid]="isTimeInvalid(row.id, 'round2')">
 						<input matInput [formControl]="getControl(row.id, 'round2')" placeholder="00:00:000"
 							(focus)="setFocusedRow(row.id)" (blur)="clearFocusedRow()" />
-						<mat-hint>mm:ss:ms</mat-hint>
+						@if (isTimeInvalid(row.id, 'round2')) {
+							<mat-error>Format: mm:ss:ms (np. 02:34:567)</mat-error>
+						} @else {
+							<mat-hint>mm:ss:ms</mat-hint>
+						}
 					</mat-form-field>
 				</td>
 			</ng-container>

@@ -61,6 +61,10 @@ export class TournamentService {
     return this.http.get<GetTournamentCurrentRoundResponse>(`${this.base(eventId, categoryId)}/tournament/rounds/current`);
   }
 
+  getRound(eventId: string, categoryId: string, roundSize: number): Observable<GetTournamentCurrentRoundResponse> {
+    return this.http.get<GetTournamentCurrentRoundResponse>(`${this.base(eventId, categoryId)}/tournament/rounds/${roundSize}`);
+  }
+
   putCurrentRound(eventId: string, categoryId: string, body: PutTournamentRoundRequest): Observable<void> {
     return this.http.put<void>(`${this.base(eventId, categoryId)}/tournament/rounds/current`, body);
   }
