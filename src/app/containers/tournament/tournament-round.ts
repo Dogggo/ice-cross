@@ -69,8 +69,8 @@ export class TournamentRound implements OnInit {
       case 4: return 'Finał';
       case 8: return 'Półfinał';
       case 16: return 'Ćwierćfinał';
-      case 32: return '1/16 finału';
-      case 64: return '1/32 finału';
+      case 32: return '1/8 finału';
+      case 64: return '1/16 finału';
       default: return `Runda ${round}`;
     }
   }
