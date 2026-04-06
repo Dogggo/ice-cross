@@ -8,6 +8,7 @@ import { ToastService } from '../../services/toast.service';
 import { TournamentService } from '../../services/tournament.service';
 import { EventsService } from '../../services/events.service';
 import { PdfService } from '../../services/pdf.service';
+import { HeatImageService, type HeatParticipant } from '../../services/heat-image.service';
 import type { LCQGroup, PlacementEntry, RacePlacement } from '../../contracts/tournament';
 
 interface ProcessedRow {
@@ -39,6 +40,7 @@ export class TournamentLcq implements OnInit {
   private readonly toast = inject(ToastService);
   private readonly eventsService = inject(EventsService);
   private readonly pdf = inject(PdfService);
+  private readonly heatImage = inject(HeatImageService);
 
   readonly eventName = signal('');
   readonly categoryName = signal('');
@@ -93,6 +95,16 @@ export class TournamentLcq implements OnInit {
       this.placements.set(map);
       this.isLoading.set(false);
     });
+  }
+
+  downloadHeatPng(groupIndex: number, group: ProcessedGroup): void {
+    const heatNumber = groupIndex + 1;
+    const showPlacements = this.groupValidities()[groupIndex];
+    const participants: HeatParticipant[] = group.rows.map((row) => ({
+      name: row.name,
+      placement: row.id ? (this.placements()[row.id] ?? '') : '',
+    }));
+    this.heatImage.download(heatNumber, participants, showPlacements);
   }
 
   getPlacement(id: string): string {

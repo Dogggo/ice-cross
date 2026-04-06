@@ -3,7 +3,7 @@
 
     <div class="event-header">
       <h1 class="event-title">{{ event.name }}</h1>
-      <span class="event-date-badge">{{ event.date | date:'dd.MM.yyyy' }}</span>
+      <span class="event-date-badge">{{ event.date | isoDate }}</span>
     </div>
 
     <div class="sections-grid">

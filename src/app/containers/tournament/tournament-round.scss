@@ -176,6 +176,33 @@
   &.invalid { background: rgba(239, 68, 68, 0.12); color: #dc2626; }
 }
 
+.heat-header-end {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.heat-img-btn {
+  width: 28px !important;
+  height: 28px !important;
+  padding: 0 !important;
+  line-height: 28px !important;
+  min-width: 28px !important;
+
+  mat-icon, .mat-icon {
+    font-size: 17px;
+    width: 17px;
+    height: 17px;
+    color: var(--text-secondary);
+    opacity: 0.6;
+    transition: opacity 0.15s;
+  }
+
+  &:hover mat-icon, &:hover .mat-icon {
+    opacity: 1;
+  }
+}
+
 .heat-table {
   width: 100%;
   border-collapse: collapse;

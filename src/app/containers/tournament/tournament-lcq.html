@@ -15,11 +15,16 @@
           <div class="heat-card" [class.heat-valid]="groupValidities()[gi]" [class.heat-invalid]="groups()[gi].participants.length > 0 && !groupValidities()[gi]">
             <div class="heat-header">
               <span class="heat-label">Bieg {{ gi + 1 }}</span>
-              @if (groupValidities()[gi]) {
-                <span class="heat-badge valid">✓</span>
-              } @else if (groups()[gi].participants.length > 0) {
-                <span class="heat-badge invalid">!</span>
-              }
+              <div class="heat-header-end">
+                @if (groupValidities()[gi]) {
+                  <span class="heat-badge valid">✓</span>
+                } @else if (groups()[gi].participants.length > 0) {
+                  <span class="heat-badge invalid">!</span>
+                }
+                <button mat-icon-button type="button" class="heat-img-btn" (click)="downloadHeatPng(gi, group)">
+                  <mat-icon>image</mat-icon>
+                </button>
+              </div>
             </div>
             <table class="heat-table">
               <thead>

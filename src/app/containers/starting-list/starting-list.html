@@ -96,7 +96,7 @@
 
 						<ng-container matColumnDef="dob">
 							<th mat-header-cell *matHeaderCellDef>Data ur.</th>
-							<td mat-cell *matCellDef="let p">{{ p.dob }}</td>
+							<td mat-cell *matCellDef="let p">{{ p.dob | isoDate }}</td>
 						</ng-container>
 
 						<ng-container matColumnDef="zgoda">

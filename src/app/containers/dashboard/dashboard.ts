@@ -1,5 +1,4 @@
 import { Component, inject } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { FormArray, FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -8,18 +7,20 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatNativeDateModule } from '@angular/material/core';
+import { DateAdapter, MAT_DATE_FORMATS } from '@angular/material/core';
+import { DdMmYyyyDateAdapter, DD_MM_YYYY_DATE_FORMATS } from '../starting-list/dd-mm-yyyy-date-adapter';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { HttpErrorResponse } from '@angular/common/http';
 import { EventsService } from '../../services/events.service';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
+import { IsoDatePipe } from '../../shared/pipes/iso-date.pipe';
 import type { Event } from '../../contracts/events';
 
 @Component({
   selector: 'app-dashboard',
   imports: [
-    DatePipe,
+    IsoDatePipe,
     RouterLink,
     ReactiveFormsModule,
     MatFormFieldModule,
@@ -28,10 +29,13 @@ import type { Event } from '../../contracts/events';
     MatButtonModule,
     MatIconModule,
     MatTooltipModule,
-    MatNativeDateModule,
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
+  providers: [
+    { provide: DateAdapter, useClass: DdMmYyyyDateAdapter },
+    { provide: MAT_DATE_FORMATS, useValue: DD_MM_YYYY_DATE_FORMATS },
+  ],
 })
 export class Dashboard {
   private readonly fb = inject(FormBuilder);
@@ -81,7 +85,7 @@ export class Dashboard {
       .map((categoryName) => categoryName.trim())
       .filter((categoryName) => categoryName.length > 0);
 
-    const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    const dateStr = date.toISOString().slice(0, 10);
 
     this.eventsService.createEvent({
       name: name.trim(),

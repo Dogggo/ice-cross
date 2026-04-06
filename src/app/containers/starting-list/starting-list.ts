@@ -18,6 +18,7 @@ import { EventsService } from '../../services/events.service';
 import { StartingListService } from '../../services/starting-list.service';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
+import { IsoDatePipe } from '../../shared/pipes/iso-date.pipe';
 import type { GetEventDetailsResponse } from '../../contracts/events';
 import type { CreateStartingListCategoryRequestBody, GetStartingListResponse } from '../../contracts/starting-list';
 
@@ -33,6 +34,7 @@ export interface Participant {
 @Component({
   selector: 'app-starting-list',
   imports: [
+    IsoDatePipe,
     ReactiveFormsModule,
     MatExpansionModule,
     MatFormFieldModule,
@@ -144,9 +146,7 @@ export class StartingList {
     if (!form || form.invalid) return;
     const val = form.getRawValue();
     const dobDate: Date | null = val.dob ? new Date(val.dob) : null;
-    const dob = dobDate
-      ? `${dobDate.getFullYear()}-${String(dobDate.getMonth() + 1).padStart(2, '0')}-${String(dobDate.getDate()).padStart(2, '0')}`
-      : '';
+    const dob = dobDate ? dobDate.toISOString().slice(0, 10) : '';
     this.participants[categoryId] = [
       ...(this.participants[categoryId] ?? []),
       { bibNumber: null, name: val.name, club: val.club, dob, consent: false, present: false },

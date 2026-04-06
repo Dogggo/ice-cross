@@ -1,15 +1,15 @@
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { DatePipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { EventsService } from '../../services/events.service';
 import type { GetEventDetailsResponse } from '../../contracts/events';
+import { IsoDatePipe } from '../../shared/pipes/iso-date.pipe';
 
 @Component({
   selector: 'app-events',
-  imports: [MatButtonModule, MatIconModule, MatTooltipModule, RouterLink, DatePipe],
+  imports: [MatButtonModule, MatIconModule, MatTooltipModule, RouterLink, IsoDatePipe],
   templateUrl: './events.html',
   styleUrl: './events.scss',
 })

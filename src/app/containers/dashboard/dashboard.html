@@ -61,7 +61,7 @@
           <div class="event-card">
             <div class="event-card-body">
               <span class="event-name">{{ event.name }}</span>
-              <span class="event-date">{{ event.date | date: 'dd.MM.yyyy' : 'UTC' }}</span>
+              <span class="event-date">{{ event.date | isoDate }}</span>
             </div>
             <div class="event-card-actions">
               <a mat-stroked-button [routerLink]="['/event', event.id]">Otwórz</a>
