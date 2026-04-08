@@ -14,7 +14,7 @@ export class PdfService {
     return `
 @page { margin: 16mm 14mm 20mm }
 * { box-sizing: border-box; margin: 0; padding: 0 }
-body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 10.5pt; color: #1a2744; background: #fff }
+body { font-family: Arial, Helvetica, sans-serif; font-size: 10.5pt; color: #1a2744; background: #fff }
 .header { background: #1a2744; color: #fff; padding: 22px 28px 20px; border-radius: 8px; margin-bottom: 26px; display: flex; justify-content: space-between; align-items: flex-start }
 .header-badge { font-size: 7pt; text-transform: uppercase; letter-spacing: 2.5px; color: rgba(255,255,255,.45); margin-bottom: 7px }
 .header-title { font-size: 20pt; font-weight: 700; letter-spacing: -.5px; line-height: 1.15; margin-top: 2px }
@@ -63,10 +63,24 @@ tr:last-child td { border-bottom: none }
     return `<div class="footer"><span>Ice Cross &mdash; System zarządzania zawodami</span><span>${timestampStr}</span></div>`;
   }
 
+  private formatDatePL(date: Date): string {
+    const months = ['stycznia','lutego','marca','kwietnia','maja','czerwca','lipca','sierpnia','września','października','listopada','grudnia'];
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${d} ${months[date.getMonth()]} ${date.getFullYear()}`;
+  }
+
+  private formatTimestampPL(date: Date): string {
+    const d = String(date.getDate()).padStart(2, '0');
+    const mo = String(date.getMonth() + 1).padStart(2, '0');
+    const h = String(date.getHours()).padStart(2, '0');
+    const mi = String(date.getMinutes()).padStart(2, '0');
+    return `${d}.${mo}.${date.getFullYear()}, ${h}:${mi}`;
+  }
+
   open(meta: PdfMeta, bodyContent: string): void {
     const now = new Date();
-    const dateStr = now.toLocaleDateString('pl-PL', { day: '2-digit', month: 'long', year: 'numeric' });
-    const timestampStr = now.toLocaleString('pl-PL');
+    const dateStr = this.formatDatePL(now);
+    const timestampStr = this.formatTimestampPL(now);
 
     const html = `<!DOCTYPE html><html lang="pl"><head><meta charset="utf-8">
 <title>${meta.documentTitle} — ${meta.categoryName}</title>
