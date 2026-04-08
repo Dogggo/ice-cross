@@ -63,7 +63,7 @@ export class HeatImageService {
       a.href = canvas.toDataURL('image/png');
       a.click();
     };
-    frame.src = '/assets/rame.png';
+    frame.src = '/rame.png';
   }
 
   private drawOverlay(
