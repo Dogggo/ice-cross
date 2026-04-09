@@ -50,10 +50,6 @@ export class HeatImageService {
       canvas.height = H;
       const ctx = canvas.getContext('2d')!;
 
-      // White background so the transparent template areas appear white
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, W, H);
-
       ctx.drawImage(frame, 0, 0, W, H);
       this.drawOverlay(ctx, heatNumber, participants, showPlacements);
 
@@ -80,14 +76,15 @@ export class HeatImageService {
       : `BIEG ${heatNumber}`;
 
     ctx.save();
-    ctx.font = `italic 800 90px ${FONT}`;
+    ctx.font = `italic 800 130px ${FONT}`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.lineJoin = 'round';
-    ctx.strokeStyle = PINK;
-    ctx.lineWidth = 10;
-    ctx.strokeText(titleText, TITLE_X, TITLE_Y);
-    ctx.fillStyle = NAVY;
+    // Pink offset shadow layer
+    ctx.fillStyle = PINK;
+    ctx.fillText(titleText, TITLE_X + 8, TITLE_Y + 8);
+    // White text on top
+    ctx.fillStyle = '#ffffff';
     ctx.fillText(titleText, TITLE_X, TITLE_Y);
     ctx.restore();
 
