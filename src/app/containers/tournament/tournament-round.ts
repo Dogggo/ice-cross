@@ -75,6 +75,13 @@ export class TournamentRound implements OnInit {
     }
   }
 
+  heatLabel(groupIndex: number): string {
+    const round = this.viewingRound();
+    if (round === 4) return 'Finał';
+    if (round === 8) return `Półfinał ${groupIndex + 1}`;
+    return `Bieg ${groupIndex + 1}`;
+  }
+
   readonly processedGroups = computed((): ProcessedGroup[] =>
     this.groups().map((g) => {
       let n = g.participants.length;
@@ -150,13 +157,13 @@ export class TournamentRound implements OnInit {
   }
 
   downloadHeatPng(groupIndex: number, group: ProcessedGroup): void {
-    const heatNumber = groupIndex + 1;
+    const label = this.heatLabel(groupIndex);
     const showPlacements = this.groupValidities()[groupIndex];
     const participants: HeatParticipant[] = group.rows.map((row) => ({
       name: row.name,
       placement: row.id ? (this.placements()[row.id] ?? '') : '',
     }));
-    this.heatImage.download(heatNumber, participants, showPlacements);
+    this.heatImage.download(label, participants, showPlacements);
   }
 
   downloadPdf(showPlacements = true): void {

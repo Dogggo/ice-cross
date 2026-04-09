@@ -98,13 +98,13 @@ export class TournamentLcq implements OnInit {
   }
 
   downloadHeatPng(groupIndex: number, group: ProcessedGroup): void {
-    const heatNumber = groupIndex + 1;
+    const label = `Bieg ${groupIndex + 1}`;
     const showPlacements = this.groupValidities()[groupIndex];
     const participants: HeatParticipant[] = group.rows.map((row) => ({
       name: row.name,
       placement: row.id ? (this.placements()[row.id] ?? '') : '',
     }));
-    this.heatImage.download(heatNumber, participants, showPlacements);
+    this.heatImage.download(label, participants, showPlacements);
   }
 
   getPlacement(id: string): string {

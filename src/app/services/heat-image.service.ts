@@ -30,8 +30,19 @@ export class HeatImageService {
   private static readonly PINK = '#e91e8c';
   private static readonly FONT = "'Barlow Condensed', Impact, 'Arial Black', sans-serif";
 
-  download(heatNumber: number, participants: HeatParticipant[], showPlacements: boolean): void {
+  download(heatLabel: string, participants: HeatParticipant[], showPlacements: boolean): void {
     const { W, H } = HeatImageService;
+
+    const sorted = [...participants].sort((a, b) => {
+      if (showPlacements) {
+        const toNum = (p: string) => p === 'DNS' ? 998 : (p === '' ? 999 : parseInt(p, 10));
+        return toNum(a.placement) - toNum(b.placement);
+      }
+      if (!a.name && !b.name) return 0;
+      if (!a.name) return 1;
+      if (!b.name) return -1;
+      return a.name.localeCompare(b.name, 'pl');
+    });
 
     const frame = new Image();
     frame.onload = async () => {
@@ -51,11 +62,12 @@ export class HeatImageService {
       const ctx = canvas.getContext('2d')!;
 
       ctx.drawImage(frame, 0, 0, W, H);
-      this.drawOverlay(ctx, heatNumber, participants, showPlacements);
+      this.drawOverlay(ctx, heatLabel, sorted, showPlacements);
 
       const suffix = showPlacements ? '-wyniki' : '';
+      const slug = heatLabel.toLowerCase().replace(/\s+/g, '-');
       const a = document.createElement('a');
-      a.download = `bieg-${heatNumber}${suffix}.png`;
+      a.download = `${slug}${suffix}.png`;
       a.href = canvas.toDataURL('image/png');
       a.click();
     };
@@ -64,7 +76,7 @@ export class HeatImageService {
 
   private drawOverlay(
     ctx: CanvasRenderingContext2D,
-    heatNumber: number,
+    heatLabel: string,
     participants: HeatParticipant[],
     showPlacements: boolean,
   ): void {
@@ -72,8 +84,8 @@ export class HeatImageService {
 
     // Heat title
     const titleText = showPlacements
-      ? `BIEG ${heatNumber} - WYNIKI`
-      : `BIEG ${heatNumber}`;
+      ? `${heatLabel.toUpperCase()} - WYNIKI`
+      : heatLabel.toUpperCase();
 
     ctx.save();
     ctx.font = `italic 800 130px ${FONT}`;

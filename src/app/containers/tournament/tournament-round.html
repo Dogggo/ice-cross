@@ -53,7 +53,7 @@
         @for (group of processedGroups(); track $index; let gi = $index) {
           <div class="heat-card" [class.heat-valid]="groupValidities()[gi]" [class.heat-invalid]="groups()[gi].participants.length > 0 && !groupValidities()[gi]">
             <div class="heat-header">
-              <span class="heat-label">Bieg {{ gi + 1 }}</span>
+              <span class="heat-label">{{ heatLabel(gi) }}</span>
               <div class="heat-header-end">
                 @if (groupValidities()[gi]) {
                   <span class="heat-badge valid">✓</span>
