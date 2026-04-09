@@ -289,6 +289,14 @@ export class StartingList {
     const reader = new FileReader();
     reader.onload = (e) => {
       const text = e.target?.result as string;
+      const parseDob = (raw: string): string => {
+        const s = raw.trim();
+        // DD/MM/YYYY or DD-MM-YYYY → YYYY-MM-DD
+        const ddmmyyyy = s.match(/^(\d{2})[\/\-](\d{2})[\/\-](\d{4})$/);
+        if (ddmmyyyy) return `${ddmmyyyy[3]}-${ddmmyyyy[2]}-${ddmmyyyy[1]}`;
+        return s; // already ISO or empty
+      };
+
       const lines = text.split(/\r?\n/).filter((l) => l.trim());
       const newParticipants: Participant[] = lines.map((line) => {
         const parts = line.split(/[,;]/);
@@ -296,7 +304,7 @@ export class StartingList {
           bibNumber: parseInt(parts[0]?.trim() ?? '0', 10) || null,
           name: parts[1]?.trim() ?? '',
           club: parts[2]?.trim() ?? '',
-          dob: parts[3]?.trim() ?? '',
+          dob: parseDob(parts[3] ?? ''),
           consent: false,
           present: false,
         };
